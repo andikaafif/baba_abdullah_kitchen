@@ -6,6 +6,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import StarIcon from '@mui/icons-material/Star';
+import GrainIcon from '@mui/icons-material/Grain';
 import { menuItems, featuredMenuIds } from '../../data/menu';
 import MenuCard from '../../components/menu/MenuCard';
 
@@ -30,6 +31,11 @@ const benefits = [
     icon: <StarIcon />,
     title: 'Made With Love',
     desc: 'Setiap gigitan penuh kasih sayang dan keikhlasan',
+  },
+  {
+    icon: <GrainIcon />,
+    title: 'Low Gluten',
+    desc: 'Rendah gluten, lebih mudah dicerna dan ramah lambung',
   },
 ];
 
@@ -234,7 +240,7 @@ const HomePage: React.FC = () => {
           WhatsApp: +62 822-6007-0364
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.6, mt: 2, display: 'block' }}>
-          © 2026 Baba Abdullah Kitchen. All rights reserved.
+          © 2026 Baba Abdullah Kitchen. All rights reserved. powered by <a href="https://umsoftware.id" style={{ color: 'inherit', textDecoration: 'underline' }}>UM Software</a>
         </Typography>
       </Box>
     </Box>

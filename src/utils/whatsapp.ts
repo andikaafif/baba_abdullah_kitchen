@@ -39,5 +39,12 @@ export function buildWhatsAppMessage(
 
 export function openWhatsApp(message: string): void {
   const encoded = encodeURIComponent(message);
-  window.open(`https://wa.me/6282260070364?text=${encoded}`, '_blank', 'noopener,noreferrer');
+  const url = `https://wa.me/6282260070364?text=${encoded}`;
+  // Safari on iOS blocks window.open for deep links; use location redirect instead
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    window.location.href = url;
+  } else {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 }

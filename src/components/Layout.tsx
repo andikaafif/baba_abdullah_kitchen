@@ -185,7 +185,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1 }}>
+      <Box component="main" sx={{ flexGrow: 1, pb: { xs: '56px', md: 0 } }}>
         {children}
       </Box>
 
