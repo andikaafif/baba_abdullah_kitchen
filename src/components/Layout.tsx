@@ -100,7 +100,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               sx={{ cursor: 'pointer', mr: 4 }}
               onClick={() => navigate('/')}
             >
-              🥟 Baba Abdullah Kitchen
+              🥟 Dapoer Baba Abdullah
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, flexGrow: 1 }}>
               {navItems.map((item) => (
@@ -161,7 +161,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               sx={{ flexGrow: 1, cursor: 'pointer' }}
               onClick={() => navigate('/')}
             >
-              🥟 Baba Abdullah Kitchen
+              🥟 Dapoer Baba Abdullah
             </Typography>
             <IconButton
               onClick={toggleHighContrast}

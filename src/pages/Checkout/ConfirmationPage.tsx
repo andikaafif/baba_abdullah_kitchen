@@ -123,7 +123,8 @@ const ConfirmationPage: React.FC = () => {
           startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <WhatsAppIcon />}
           disabled={loading}
           onClick={handleDownloadAndWhatsApp}
-          aria-label="Unduh struk dan kirim via WhatsApp"
+          aria-label="Unduh struk dan lanjutkan pesanan via WhatsApp"
+          // aria-label="Unduh struk dan kirim via WhatsApp"
           sx={{ mb: 2, bgcolor: '#25D366', '&:hover': { bgcolor: '#1EBE59' } }}
         >
           {loading ? 'Memproses...' : '📥 Unduh Struk & Kirim WhatsApp'}

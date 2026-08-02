@@ -9,7 +9,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.svg', 'icons/*.png'],
       manifest: {
-        name: 'Baba Abdullah Kitchen',
+        name: 'Dapoer Baba Abdullah',
         short_name: 'BAK',
         description: 'Dim Sum Homemade Premium - Order online',
         theme_color: '#8B4513',

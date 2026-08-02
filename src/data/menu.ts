@@ -1,4 +1,10 @@
 import type { MenuItem } from '../types';
+import imgKukusOriginal from '../assets/product_image/kukus_original.jpeg';
+import imgMentai from '../assets/product_image/mentai.jpeg';
+import imgMentaiMixOriginal from '../assets/product_image/mentai_mix_original.jpeg';
+import imgCheeseCheddar from '../assets/product_image/cheese_cheddar.jpeg';
+import imgCheeseCheddarMixMentai from '../assets/product_image/cheese_cheddar_mix_mentai.jpeg';
+import imgFrozen from '../assets/product_image/frozen.jpeg';
 
 export const menuItems: MenuItem[] = [
   {
@@ -13,7 +19,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Medium', pcs: '10 pcs', price: 43000 },
       { label: 'Family Pack', pcs: '12 pcs', price: 58000 },
     ],
-    image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=400&h=300&fit=crop',
+    image: imgKukusOriginal,
   },
   {
     id: 'mentai-regular',
@@ -25,7 +31,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Medium', pcs: '6 pcs', price: 34000 },
       { label: 'Family Pack', pcs: '12 pcs', price: 60000 },
     ],
-    image: 'https://images.unsplash.com/photo-1582482067920-f30e1f5ea75c?w=400&h=300&fit=crop',
+    image: imgMentai,
   },
   {
     id: 'mentai-mix-original',
@@ -37,7 +43,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Medium', pcs: '6 pcs', price: 45000 },
       { label: 'Family Pack', pcs: '12 pcs', price: 58000 },
     ],
-    image: 'https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&h=300&fit=crop',
+    image: imgMentaiMixOriginal,
   },
   {
     id: 'cheese-cheddar',
@@ -50,7 +56,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Medium', pcs: '6 pcs', price: 40000 },
       { label: 'Family Pack', pcs: '12 pcs', price: 63000 },
     ],
-    image: 'https://images.unsplash.com/photo-1571805529673-0f56b922b359?w=400&h=300&fit=crop',
+    image: imgCheeseCheddar,
   },
   {
     id: 'cheese-cheddar-mix-mentai',
@@ -62,7 +68,7 @@ export const menuItems: MenuItem[] = [
       { label: 'Medium', pcs: '6 pcs', price: 45000 },
       { label: 'Family Pack', pcs: '12 pcs', price: 65000 },
     ],
-    image: 'https://images.unsplash.com/photo-1615361200141-f45040f367be?w=400&h=300&fit=crop',
+    image: imgCheeseCheddarMixMentai,
   },
   {
     id: 'frozen',
@@ -73,7 +79,7 @@ export const menuItems: MenuItem[] = [
       { label: '10 pcs', pcs: '10 pcs', price: 44000 },
       { label: '20 pcs', pcs: '20 pcs', price: 80000 },
     ],
-    image: 'https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=400&h=300&fit=crop',
+    image: imgFrozen,
   },
 ];
 

@@ -88,7 +88,7 @@ const HomePage: React.FC = () => {
               textShadow: '0 2px 8px rgba(0,0,0,0.2)',
             }}
           >
-            🥟 Baba Abdullah Kitchen
+            🥟 Dapoer Baba Abdullah
           </Typography>
           <Typography
             variant="h5"
@@ -138,7 +138,7 @@ const HomePage: React.FC = () => {
           maxWidth={500}
           mx="auto"
         >
-          Baba Abdullah Kitchen hadir dengan komitmen kualitas terbaik untuk keluarga Anda
+          Dapoer Baba Abdullah hadir dengan komitmen kualitas terbaik untuk keluarga Anda
         </Typography>
         <Grid container spacing={3} justifyContent="center">
           {benefits.map((b) => (
@@ -231,7 +231,7 @@ const HomePage: React.FC = () => {
         }}
       >
         <Typography variant="h6" fontWeight={700}>
-          🥟 Baba Abdullah Kitchen
+          🥟 Dapoer Baba Abdullah
         </Typography>
         <Typography variant="body2" sx={{ opacity: 0.8, mt: 1 }}>
           Dim Sum Homemade Premium · Segar Setiap Hari
@@ -240,7 +240,7 @@ const HomePage: React.FC = () => {
           WhatsApp: +62 822-6007-0364
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.6, mt: 2, display: 'block' }}>
-          © 2026 Baba Abdullah Kitchen. All rights reserved. powered by <a href="https://umsoftware.id" style={{ color: 'inherit', textDecoration: 'underline' }}>UM Software</a>
+          © 2026 Dapoer Baba Abdullah. All rights reserved. powered by <a href="https://umsoftware.id" style={{ color: 'inherit', textDecoration: 'underline' }}>UM Software</a>
         </Typography>
       </Box>
     </Box>

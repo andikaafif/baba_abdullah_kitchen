@@ -19,7 +19,7 @@ export function buildWhatsAppMessage(
   const subtotal = items.reduce((sum, i) => sum + i.variant.price * i.quantity, 0);
 
   return (
-    `Assalamu'alaikum Baba Abdullah Kitchen 🥟\n\n` +
+    `Assalamu'alaikum Dapoer Baba Abdullah 🥟\n\n` +
     `Saya ingin memesan:\n\n` +
     `${itemLines}\n\n` +
     `────────────────\n` +
@@ -29,7 +29,7 @@ export function buildWhatsAppMessage(
     `Nama: ${customerInfo.name}\n` +
     `Alamat: ${customerInfo.address}\n` +
     `No. HP: ${customerInfo.phone}\n` +
-    `Metode Pengiriman: ${customerInfo.deliveryMethod}\n` +
+    `Metode Pengiriman: ${customerInfo.deliveryMethod}${customerInfo.deliveryArea ? ` - ${customerInfo.deliveryArea}` : ''}\n` +
     `Pembayaran: ${customerInfo.paymentMethod}\n` +
     `Catatan: ${customerInfo.notes || '-'}\n` +
     `No. Order: ${orderNumber}\n\n` +

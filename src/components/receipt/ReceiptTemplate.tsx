@@ -28,7 +28,7 @@ const ReceiptTemplate = React.forwardRef<HTMLDivElement, ReceiptTemplateProps>(
         {/* Header */}
         <Box sx={{ bgcolor: '#8B4513', color: '#fff', p: 2, textAlign: 'center', borderRadius: 2 }}>
           <Typography variant="h6" fontWeight={700}>
-            Baba Abdullah Kitchen
+            Dapoer Baba Abdullah
           </Typography>
           <Typography variant="caption">🥟 Dim Sum Homemade Premium</Typography>
         </Box>
@@ -91,7 +91,7 @@ const ReceiptTemplate = React.forwardRef<HTMLDivElement, ReceiptTemplateProps>(
 
         <Box sx={{ textAlign: 'center', pt: 1, borderTop: '1px solid #8B4513' }}>
           <Typography variant="caption" color="text.secondary">
-            Terima kasih telah memesan di Baba Abdullah Kitchen!
+            Terima kasih telah memesan di Dapoer Baba Abdullah!
           </Typography>
           <br />
           <Typography variant="caption" color="text.secondary">

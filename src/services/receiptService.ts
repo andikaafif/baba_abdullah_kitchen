@@ -35,7 +35,7 @@ export async function generatePDF(
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('Baba Abdullah Kitchen', pageWidth / 2, 14, { align: 'center' });
+  doc.text('Dapoer Baba Abdullah', pageWidth / 2, 14, { align: 'center' });
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text('Dim Sum Homemade Premium', pageWidth / 2, 22, { align: 'center' });
@@ -125,7 +125,7 @@ export async function generatePDF(
   doc.setTextColor(100, 100, 100);
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(9);
-  doc.text('Terima kasih telah memesan di Baba Abdullah Kitchen!', pageWidth / 2, y, {
+  doc.text('Terima kasih telah memesan di Dapoer Baba Abdullah!', pageWidth / 2, y, {
     align: 'center',
   });
   y += 5;

@@ -34,6 +34,7 @@ export interface CustomerInfo {
   address: string;
   notes?: string;
   deliveryMethod: DeliveryMethod;
+  deliveryArea?: string;
   paymentMethod: PaymentMethod;
 }
 

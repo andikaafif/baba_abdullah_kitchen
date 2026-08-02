@@ -8,22 +8,51 @@ import {
   FormControlLabel,
   Radio,
   Typography,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormHelperText,
+  Alert,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { CustomerInfo } from '../../types';
 
-const schema = z.object({
-  name: z.string().min(2, 'Nama minimal 2 karakter'),
-  phone: z
-    .string()
-    .regex(/^(\+62|62|0)[0-9]{8,12}$/, 'Format nomor HP tidak valid (contoh: 08123456789)'),
-  address: z.string().min(5, 'Alamat minimal 5 karakter'),
-  notes: z.string().optional(),
-  deliveryMethod: z.enum(['Pickup', 'Delivery']),
-  paymentMethod: z.enum(['Cash', 'Transfer', 'QRIS']),
-});
+export const DELIVERY_AREAS = [
+  'Galaxy Kota Bekasi',
+  'Kemang Pratama Kota Bekasi',
+  'Rawa Lumbu Kota Bekasi',
+  'Taman Narogong Indah Kota Bekasi',
+  'Pondok Timur Indah Kota Bekasi',
+  'Pondok Hijau Kota Bekasi',
+  'Jatimulya Kota Bekasi',
+  'Grandwisata Kota Bekasi',
+  'Familia Urban Bekasi',
+  'Mustika Jaya Kota Bekasi',
+  'Mustika Sari Kota Bekasi',
+  'Pedurenan Kota Bekasi',
+];
+
+const schema = z
+  .object({
+    name: z.string().min(2, 'Nama minimal 2 karakter'),
+    phone: z
+      .string()
+      .regex(/^(\+62|62|0)[0-9]{8,12}$/, 'Format nomor HP tidak valid (contoh: 08123456789)'),
+    address: z.string().min(5, 'Alamat minimal 5 karakter'),
+    notes: z.string().optional(),
+    deliveryMethod: z.enum(['Pickup', 'Delivery']),
+    deliveryArea: z.string().optional(),
+    paymentMethod: z.enum(['Cash', 'Transfer', 'QRIS']),
+  })
+  .refine(
+    (data) => {
+      if (data.deliveryMethod === 'Delivery') return !!data.deliveryArea;
+      return true;
+    },
+    { message: 'Pilih area pengiriman', path: ['deliveryArea'] }
+  );
 
 type FormData = z.infer<typeof schema>;
 
@@ -36,6 +65,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues }) 
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -45,9 +75,12 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues }) 
       address: defaultValues?.address || '',
       notes: defaultValues?.notes || '',
       deliveryMethod: defaultValues?.deliveryMethod || 'Delivery',
+      deliveryArea: defaultValues?.deliveryArea || '',
       paymentMethod: defaultValues?.paymentMethod || 'Cash',
     },
   });
+
+  const deliveryMethod = watch('deliveryMethod');
 
   return (
     <Box
@@ -146,6 +179,50 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues }) 
           />
         </FormControl>
       </Box>
+
+      {deliveryMethod === 'Pickup' && (
+        <Alert severity="info" sx={{ fontSize: '0.8rem' }}>
+          Ambil pesanan di lokasi kami.{' '}
+          <a
+            href="https://maps.app.goo.gl/JCBAmN6bCf1nxqZE9"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Lihat lokasi di Google Maps
+          </a>
+        </Alert>
+      )}
+
+      {deliveryMethod === 'Delivery' && (        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Alert severity="info" sx={{ fontSize: '0.8rem' }}>
+            Pengiriman hanya tersedia untuk area Kota Bekasi berikut.
+          </Alert>
+          <Controller
+            name="deliveryArea"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth required error={!!errors.deliveryArea}>
+                <InputLabel id="delivery-area-label">Area Pengiriman</InputLabel>
+                <Select
+                  {...field}
+                  labelId="delivery-area-label"
+                  label="Area Pengiriman"
+                  inputProps={{ 'aria-label': 'Area pengiriman' }}
+                >
+                  {DELIVERY_AREAS.map((area) => (
+                    <MenuItem key={area} value={area}>
+                      {area}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.deliveryArea && (
+                  <FormHelperText>{errors.deliveryArea.message}</FormHelperText>
+                )}
+              </FormControl>
+            )}
+          />
+        </Box>
+      )}
 
       <Box>
         <FormControl component="fieldset" required>

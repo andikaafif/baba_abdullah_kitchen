@@ -160,6 +160,11 @@ const CheckoutPage: React.FC = () => {
             <Typography variant="body2">
               <strong>Pengiriman:</strong> {customerInfo.deliveryMethod}
             </Typography>
+            {customerInfo.deliveryMethod === 'Delivery' && customerInfo.deliveryArea && (
+              <Typography variant="body2">
+                <strong>Area Pengiriman:</strong> {customerInfo.deliveryArea}
+              </Typography>
+            )}
             <Typography variant="body2">
               <strong>Pembayaran:</strong> {customerInfo.paymentMethod}
             </Typography>
@@ -177,10 +182,11 @@ const CheckoutPage: React.FC = () => {
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant="outlined"
+              startIcon={<ArrowBackIcon />}
               onClick={() => setActiveStep(0)}
               aria-label="Kembali ke informasi pelanggan"
             >
-              ← Edit Info
+              Edit Info
             </Button>
             <Button
               variant="contained"

@@ -1,4 +1,4 @@
-# Baba Abdullah Kitchen
+# Dapoer Baba Abdullah
 # PWA Requirements Documentation
 
 Version: 1.0
@@ -8,7 +8,7 @@ Platform: Progressive Web App (PWA)
 
 # 1. Overview
 
-Develop a Progressive Web Application (PWA) for **Baba Abdullah Kitchen**, a dim sum ordering application.
+Develop a Progressive Web Application (PWA) for **Dapoer Baba Abdullah**, a dim sum ordering application.
 
 The application should allow customers to:
 
@@ -109,7 +109,7 @@ or
 
 Business Name
 
-Baba Abdullah Kitchen
+Dapoer Baba Abdullah
 
 Theme
 
@@ -457,7 +457,7 @@ PNG Receipt
 
 Receipt contains:
 
-Baba Abdullah Kitchen
+Dapoer Baba Abdullah
 
 Order Number
 
@@ -507,7 +507,7 @@ Message example:
 
 --------------------------------
 
-Assalamu'alaikum Baba Abdullah Kitchen
+Assalamu'alaikum Dapoer Baba Abdullah
 
 Saya ingin memesan:
 
