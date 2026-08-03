@@ -182,6 +182,7 @@ const CheckoutPage: React.FC = () => {
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant="outlined"
+              fullWidth
               startIcon={<ArrowBackIcon />}
               onClick={() => setActiveStep(0)}
               aria-label="Kembali ke informasi pelanggan"

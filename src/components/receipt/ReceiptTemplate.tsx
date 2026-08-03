@@ -8,11 +8,12 @@ interface ReceiptTemplateProps {
   customerInfo: CustomerInfo;
   orderNumber: string;
   totalPrice: number;
+  shippingFee: number;
   orderDate: Date;
 }
 
 const ReceiptTemplate = React.forwardRef<HTMLDivElement, ReceiptTemplateProps>(
-  ({ items, customerInfo, orderNumber, totalPrice, orderDate }, ref) => {
+  ({ items, customerInfo, orderNumber, totalPrice, shippingFee, orderDate }, ref) => {
     return (
       <Box
         ref={ref}
@@ -80,12 +81,26 @@ const ReceiptTemplate = React.forwardRef<HTMLDivElement, ReceiptTemplateProps>(
 
         <Divider sx={{ my: 1.5, borderColor: '#8B4513' }} />
 
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant="body2">Subtotal</Typography>
+          <Typography variant="body2">{formatRupiah(totalPrice)}</Typography>
+        </Box>
+        {shippingFee > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              Ongkos Kirim
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {formatRupiah(shippingFee)}
+            </Typography>
+          </Box>
+        )}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="subtitle1" fontWeight={700} color="primary">
-            TOTAL
+            TOTAL BAYAR
           </Typography>
           <Typography variant="subtitle1" fontWeight={700} color="primary">
-            {formatRupiah(totalPrice)}
+            {formatRupiah(totalPrice + shippingFee)}
           </Typography>
         </Box>
 

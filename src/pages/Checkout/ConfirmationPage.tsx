@@ -18,11 +18,13 @@ import { generatePDF, generatePNG } from '../../services/receiptService';
 import { buildWhatsAppMessage, openWhatsApp } from '../../utils/whatsapp';
 import ReceiptTemplate from '../../components/receipt/ReceiptTemplate';
 import { useCartStore } from '../../store/cartStore';
+import { getShippingFee } from '../../components/checkout/CustomerForm';
 
 interface LocationState {
   customerInfo: CustomerInfo;
   items: CartItem[];
   totalPrice: number;
+  shippingFee: number;
 }
 
 const ConfirmationPage: React.FC = () => {
@@ -45,16 +47,18 @@ const ConfirmationPage: React.FC = () => {
 
   if (!state) return null;
 
-  const { customerInfo, items, totalPrice } = state;
+  const { customerInfo, items, totalPrice, shippingFee: stateFee } = state;
+  const shippingFee = stateFee ?? getShippingFee(customerInfo.deliveryArea);
+  const grandTotal = totalPrice + shippingFee;
 
   const handleDownloadAndWhatsApp = async () => {
     setLoading(true);
     try {
-      await generatePDF(items, customerInfo, orderNumber, totalPrice, orderDate);
+      await generatePDF(items, customerInfo, orderNumber, totalPrice, shippingFee, orderDate);
       await new Promise((r) => setTimeout(r, 500));
       await generatePNG('receipt-template');
       await new Promise((r) => setTimeout(r, 500));
-      const message = buildWhatsAppMessage(items, customerInfo, orderNumber, totalPrice);
+      const message = buildWhatsAppMessage(items, customerInfo, orderNumber, totalPrice, shippingFee);
       openWhatsApp(message);
       clearCart();
       setDone(true);
@@ -103,10 +107,25 @@ const ConfirmationPage: React.FC = () => {
           </Box>
         ))}
         <Divider sx={{ my: 1.5 }} />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+          <Typography variant="body2">Subtotal</Typography>
+          <Typography variant="body2">{formatRupiah(totalPrice)}</Typography>
+        </Box>
+        {shippingFee > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              Ongkos Kirim
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {formatRupiah(shippingFee)}
+            </Typography>
+          </Box>
+        )}
+        <Divider sx={{ my: 1 }} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography fontWeight={700}>Total</Typography>
+          <Typography fontWeight={700}>Total Bayar</Typography>
           <Typography fontWeight={700} color="primary">
-            {formatRupiah(totalPrice)}
+            {formatRupiah(grandTotal)}
           </Typography>
         </Box>
       </Paper>
@@ -152,6 +171,7 @@ const ConfirmationPage: React.FC = () => {
           customerInfo={customerInfo}
           orderNumber={orderNumber}
           totalPrice={totalPrice}
+          shippingFee={shippingFee}
           orderDate={orderDate}
         />
       </Box>

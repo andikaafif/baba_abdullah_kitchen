@@ -5,7 +5,8 @@ export function buildWhatsAppMessage(
   items: CartItem[],
   customerInfo: CustomerInfo,
   orderNumber: string,
-  totalPrice: number
+  totalPrice: number,
+  shippingFee: number
 ): string {
   const itemLines = items
     .map(
@@ -17,6 +18,7 @@ export function buildWhatsAppMessage(
     .join('\n\n');
 
   const subtotal = items.reduce((sum, i) => sum + i.variant.price * i.quantity, 0);
+  const shippingLine = shippingFee > 0 ? `Ongkos Kirim: ${formatRupiah(shippingFee)}\n` : '';
 
   return (
     `Assalamu'alaikum Dapoer Baba Abdullah 🥟\n\n` +
@@ -24,7 +26,8 @@ export function buildWhatsAppMessage(
     `${itemLines}\n\n` +
     `────────────────\n` +
     `Subtotal: ${formatRupiah(subtotal)}\n` +
-    `Total: ${formatRupiah(totalPrice)}\n` +
+    `${shippingLine}` +
+    `Total Bayar: ${formatRupiah(totalPrice + shippingFee)}\n` +
     `────────────────\n\n` +
     `Nama: ${customerInfo.name}\n` +
     `Alamat: ${customerInfo.address}\n` +

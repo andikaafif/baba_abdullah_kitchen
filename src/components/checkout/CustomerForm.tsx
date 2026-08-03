@@ -34,6 +34,21 @@ export const DELIVERY_AREAS = [
   'Pedurenan Kota Bekasi',
 ];
 
+// Areas that are exempt from the shipping fee
+export const FREE_DELIVERY_AREAS = [
+  'Familia Urban Bekasi',
+  'Mustika Sari Kota Bekasi',
+  'Jatimulya Kota Bekasi',
+  'Mustika Jaya Kota Bekasi',
+];
+
+export const SHIPPING_FEE = 10000;
+
+export function getShippingFee(area?: string): number {
+  if (!area) return 0;
+  return FREE_DELIVERY_AREAS.includes(area) ? 0 : SHIPPING_FEE;
+}
+
 const schema = z
   .object({
     name: z.string().min(2, 'Nama minimal 2 karakter'),
@@ -195,7 +210,8 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues }) 
 
       {deliveryMethod === 'Delivery' && (        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Alert severity="info" sx={{ fontSize: '0.8rem' }}>
-            Pengiriman hanya tersedia untuk area Kota Bekasi berikut.
+            Pengiriman hanya tersedia untuk area Kota Bekasi berikut. Area selain Familia Urban
+            Bekasi, Mustika Sari, Jatimulya, dan Mustika Jaya dikenakan ongkos kirim Rp 10.000.
           </Alert>
           <Controller
             name="deliveryArea"

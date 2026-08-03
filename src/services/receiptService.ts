@@ -23,6 +23,7 @@ export async function generatePDF(
   customerInfo: CustomerInfo,
   orderNumber: string,
   totalPrice: number,
+  shippingFee: number,
   orderDate: Date
 ): Promise<void> {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' });
@@ -111,11 +112,22 @@ export async function generatePDF(
   y += 4;
   doc.line(10, y, pageWidth - 10, y);
   y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Subtotal:', 10, y);
+  doc.text(formatRupiah(totalPrice), pageWidth - 10, y, { align: 'right' });
+  if (shippingFee > 0) {
+    y += 6;
+    doc.text('Ongkos Kirim:', 10, y);
+    doc.text(formatRupiah(shippingFee), pageWidth - 10, y, { align: 'right' });
+  }
+  y += 6;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(139, 69, 19);
-  doc.text('TOTAL:', 10, y);
-  doc.text(formatRupiah(totalPrice), pageWidth - 10, y, { align: 'right' });
+  doc.text('TOTAL BAYAR:', 10, y);
+  doc.text(formatRupiah(totalPrice + shippingFee), pageWidth - 10, y, { align: 'right' });
   y += 14;
 
   // Footer
