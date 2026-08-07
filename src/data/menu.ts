@@ -28,6 +28,7 @@ export const menuItems: MenuItem[] = [
     description:
       'Dimsum dengan saus mentai creamy yang kaya rasa, dibakar sempurna hingga kecoklatan.',
     variants: [
+      { label: 'Small', pcs: '4 pcs', price: 27500 },
       { label: 'Medium', pcs: '6 pcs', price: 34000 },
       { label: 'Family Pack', pcs: '12 pcs', price: 60000 },
     ],
