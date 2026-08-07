@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
-          server-dir: /home/mustsee02/baba-menu.umsoftware.id/
+          server-dir: /baba-menu.umsoftware.id/
           exclude: |
             **/.git*
             **/.git*/**
