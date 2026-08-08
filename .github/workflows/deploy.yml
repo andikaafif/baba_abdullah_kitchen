@@ -57,6 +57,7 @@ jobs:
         run: |
           mkdir -p deploy
           cp -r dist/* deploy/
+          cp .htaccess deploy/.htaccess
           mkdir -p deploy/backend
           cp -r backend/dist deploy/backend/dist
           cp backend/package.json deploy/backend/package.json
