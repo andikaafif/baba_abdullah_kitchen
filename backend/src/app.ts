@@ -18,11 +18,14 @@ import settingsRouter from './routes/settings';
 
 const app = express();
 
-// CORS — allow all origins for local development
-app.use(cors({ origin: true, credentials: true }));
+// CORS — restrict origins in production
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : true; // allow all in development when not set
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 // Handle preflight requests explicitly (before rate limiters)
-app.options('*', cors({ origin: true, credentials: true }));
+app.options('*', cors({ origin: allowedOrigins, credentials: true }));
 
 // Body parsers
 app.use(express.json({ limit: '10mb' }));

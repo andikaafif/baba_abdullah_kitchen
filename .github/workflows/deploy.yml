@@ -2,7 +2,6 @@ name: Build & Deploy to cPanel
 
 on:
   push:
-    # branches: [main]
     branches: [deployment]
 
 jobs:
@@ -25,6 +24,8 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_API_URL: https://baba-menu.umsoftware.id
 
       # ── Backend ──
       - name: Install backend dependencies
@@ -34,6 +35,22 @@ jobs:
       - name: Build backend
         working-directory: ./backend
         run: npm run build
+
+      # ── Create backend .env from secrets ──
+      - name: Create backend .env
+        working-directory: ./backend
+        run: |
+          cat <<EOF > .env
+          PORT=3000
+          DB_PORT=3306
+          DB_HOST=localhost
+          DB_USER=${{ secrets.DB_USER }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          UPLOAD_DIR=./uploads
+          ALLOWED_ORIGINS=https://baba-menu.umsoftware.id
+          EOF
 
       # ── Prepare deploy bundle ──
       - name: Prepare deploy directory
@@ -45,8 +62,8 @@ jobs:
           cp backend/package.json deploy/backend/package.json
           cp backend/package-lock.json deploy/backend/package-lock.json
           cp -r backend/node_modules deploy/backend/node_modules
-          if [ -f backend/.env ]; then cp backend/.env deploy/backend/.env; fi
-          if [ -d backend/uploads ]; then mkdir -p deploy/backend/uploads; fi
+          cp backend/.env deploy/backend/.env
+          mkdir -p deploy/backend/uploads
 
       # ── Deploy ──
       - name: Deploy via FTP
