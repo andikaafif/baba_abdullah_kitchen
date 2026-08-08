@@ -23,21 +23,17 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import ContrastIcon from '@mui/icons-material/Contrast';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useUIStore } from '../store/uiStore';
 import CartBottomSheet from './cart/CartBottomSheet';
-
-interface LayoutProps {
-  children: React.ReactNode;
-}
 
 const navItems = [
   { label: 'Home', path: '/', icon: <HomeIcon /> },
   { label: 'Menu', path: '/menu', icon: <RestaurantMenuIcon /> },
 ];
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -186,7 +182,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <Box component="main" sx={{ flexGrow: 1, pb: { xs: '56px', md: 0 } }}>
-        {children}
+        <Outlet />
       </Box>
 
       {/* Bottom Navigation — Mobile */}

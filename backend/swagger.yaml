@@ -1,0 +1,731 @@
+openapi: 3.0.3
+info:
+  title: Baba Abdullah Kitchen API
+  description: |
+    Microservices REST API for Baba Abdullah Kitchen PWA dashboard.
+    Supports product management, inventory, orders, sales reports, and promotions.
+  version: 1.0.0
+  contact:
+    name: Baba Abdullah Kitchen
+servers:
+  - url: http://localhost:4000
+    description: Local development
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        created_at: { type: string, format: date-time }
+
+    ProductVariant:
+      type: object
+      properties:
+        id: { type: integer }
+        product_id: { type: integer }
+        label: { type: string }
+        pcs: { type: string }
+        price: { type: number }
+        cost_price: { type: number }
+        stock: { type: integer }
+
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        photo_url: { type: string, nullable: true }
+        category_id: { type: integer }
+        category_name: { type: string }
+        description: { type: string, nullable: true }
+        is_active: { type: integer, enum: [0, 1] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+
+    OrderItem:
+      type: object
+      properties:
+        id: { type: integer }
+        order_id: { type: integer }
+        product_variant_id: { type: integer, nullable: true }
+        product_name: { type: string }
+        variant_label: { type: string }
+        quantity: { type: integer }
+        unit_price: { type: number }
+        unit_cost: { type: number }
+        subtotal: { type: number }
+
+    Order:
+      type: object
+      properties:
+        id: { type: integer }
+        order_number: { type: string }
+        customer_name: { type: string }
+        customer_phone: { type: string, nullable: true }
+        customer_address: { type: string, nullable: true }
+        delivery_method: { type: string, enum: [Pickup, Delivery] }
+        payment_method: { type: string, enum: [Cash, Transfer, QRIS] }
+        total_price: { type: number }
+        profit: { type: number }
+        status:
+          type: string
+          enum: [pending, confirmed, preparing, ready, delivered, cancelled]
+        notes: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+
+    Promotion:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        discount_type: { type: string, enum: [percent, fixed] }
+        discount_value: { type: number }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        is_active: { type: integer, enum: [0, 1] }
+        created_at: { type: string, format: date-time }
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              name: { type: string }
+
+    SalesReport:
+      type: object
+      properties:
+        period_label: { type: string }
+        order_count: { type: integer }
+        total_revenue: { type: number }
+
+    ProfitReport:
+      type: object
+      properties:
+        period_label: { type: string }
+        order_count: { type: integer }
+        total_revenue: { type: number }
+        total_profit: { type: number }
+
+    TopVariant:
+      type: object
+      properties:
+        variant_id: { type: integer }
+        product_name: { type: string }
+        category_name: { type: string }
+        variant_label: { type: string }
+        pcs: { type: string }
+        total_sold: { type: integer }
+        total_revenue: { type: number }
+
+tags:
+  - name: Auth
+    description: Admin authentication
+  - name: Categories
+    description: Product category management
+  - name: Products
+    description: Product & inventory management
+  - name: Orders
+    description: Customer order management
+  - name: Reports
+    description: Sales, profit & analytics reports
+  - name: Promotions
+    description: Event-based promotion management
+
+paths:
+  /api/auth/login:
+    post:
+      summary: Admin login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string, example: admin }
+                password: { type: string, example: admin123 }
+      responses:
+        '200':
+          description: JWT token returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  username: { type: string }
+        '401':
+          description: Invalid credentials
+
+  /api/categories:
+    get:
+      summary: List all categories
+      tags: [Categories]
+      responses:
+        '200':
+          description: Array of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      summary: Create category
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, slug]
+              properties:
+                name: { type: string }
+                slug: { type: string }
+      responses:
+        '201':
+          description: Category created
+
+  /api/categories/{id}:
+    put:
+      summary: Update category
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                slug: { type: string }
+      responses:
+        '200':
+          description: Category updated
+    delete:
+      summary: Delete category
+      tags: [Categories]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Deleted
+
+  /api/products:
+    get:
+      summary: List products
+      tags: [Products]
+      parameters:
+        - in: query
+          name: category_id
+          schema: { type: integer }
+        - in: query
+          name: is_active
+          schema: { type: integer, enum: [0, 1] }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: Array of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Create product
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, category_id]
+              properties:
+                name: { type: string }
+                category_id: { type: integer }
+                description: { type: string }
+                photo: { type: string, format: binary }
+                variants:
+                  type: string
+                  description: JSON array of variant objects
+      responses:
+        '201':
+          description: Product created
+
+  /api/products/{id}:
+    get:
+      summary: Get single product
+      tags: [Products]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+    put:
+      summary: Update product
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                category_id: { type: integer }
+                description: { type: string }
+                is_active: { type: integer }
+                photo: { type: string, format: binary }
+                variants: { type: string }
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Soft-delete product
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Soft-deleted
+
+  /api/products/{id}/inventory:
+    patch:
+      summary: Update stock per variant
+      tags: [Products]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                variants:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      variant_id: { type: integer }
+                      stock: { type: integer }
+                      change_qty: { type: integer }
+                      reason: { type: string }
+      responses:
+        '200':
+          description: Stock updated
+
+  /api/orders:
+    get:
+      summary: List orders
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Array of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+    post:
+      summary: Create order (from PWA)
+      tags: [Orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customer_name, items, delivery_method, payment_method]
+              properties:
+                customer_name: { type: string }
+                customer_phone: { type: string }
+                customer_address: { type: string }
+                delivery_method: { type: string, enum: [Pickup, Delivery] }
+                payment_method: { type: string, enum: [Cash, Transfer, QRIS] }
+                notes: { type: string }
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [product_name, variant_label, quantity, unit_price]
+                    properties:
+                      product_variant_id: { type: integer }
+                      product_name: { type: string }
+                      variant_label: { type: string }
+                      quantity: { type: integer }
+                      unit_price: { type: number }
+                      unit_cost: { type: number }
+      responses:
+        '201':
+          description: Order created
+
+  /api/orders/{id}:
+    get:
+      summary: Get order with items
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Order detail
+
+  /api/orders/{id}/status:
+    patch:
+      summary: Update order status
+      tags: [Orders]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [pending, confirmed, preparing, ready, delivered, cancelled]
+      responses:
+        '200':
+          description: Status updated
+
+  /api/reports/sales:
+    get:
+      summary: Sales totals by period
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema: { type: string, enum: [daily, weekly, monthly], default: daily }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Sales report data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SalesReport'
+
+  /api/reports/profit:
+    get:
+      summary: Profit totals by period
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema: { type: string, enum: [daily, weekly, monthly], default: daily }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Profit report data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProfitReport'
+
+  /api/reports/top-variants:
+    get:
+      summary: Best selling variants
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: Top variants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopVariant'
+
+  /api/reports/sales/table:
+    get:
+      summary: Tabular sales breakdown
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Tabular data
+
+  /api/reports/export/excel:
+    get:
+      summary: Export sales as Excel file
+      tags: [Reports]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Excel file
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  /api/promotions:
+    get:
+      summary: List all promotions
+      tags: [Promotions]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Array of promotions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Promotion'
+    post:
+      summary: Create promotion
+      tags: [Promotions]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, discount_type, discount_value, start_date, end_date]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                discount_type: { type: string, enum: [percent, fixed] }
+                discount_value: { type: number }
+                start_date: { type: string, format: date }
+                end_date: { type: string, format: date }
+                is_active: { type: integer }
+                product_ids:
+                  type: array
+                  items: { type: integer }
+      responses:
+        '201':
+          description: Promotion created
+
+  /api/promotions/{id}:
+    get:
+      summary: Get promotion
+      tags: [Promotions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Promotion detail
+    put:
+      summary: Update promotion
+      tags: [Promotions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                discount_type: { type: string, enum: [percent, fixed] }
+                discount_value: { type: number }
+                start_date: { type: string, format: date }
+                end_date: { type: string, format: date }
+                is_active: { type: integer }
+                product_ids:
+                  type: array
+                  items: { type: integer }
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete promotion
+      tags: [Promotions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Deleted
+
+  /api/promotions/{id}/products:
+    post:
+      summary: Attach/detach products to promotion
+      tags: [Promotions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_ids:
+                  type: array
+                  items: { type: integer }
+      responses:
+        '200':
+          description: Products updated
