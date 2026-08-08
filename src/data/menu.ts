@@ -1,6 +1,6 @@
 import type { MenuItem } from '../types';
 import imgKukusOriginal from '../assets/product_image/kukus_original.jpeg';
-import imgBirthdayDimsum from '../assets/product_image/birthday_dimsum.jpeg';
+import imgBirthdayDimsum from '../assets/product_image/birthday_dimsum.png';
 import imgMentai from '../assets/product_image/mentai.jpeg';
 import imgMentaiMixOriginal from '../assets/product_image/mentai_mix_original.jpeg';
 import imgCheeseCheddar from '../assets/product_image/cheese_cheddar.jpeg';
