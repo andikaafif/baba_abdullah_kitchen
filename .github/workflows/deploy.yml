@@ -19,19 +19,43 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
+      # ── Frontend ──
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build frontend
         run: npm run build
 
+      # ── Backend ──
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Build backend
+        working-directory: ./backend
+        run: npm run build
+
+      # ── Prepare deploy bundle ──
+      - name: Prepare deploy directory
+        run: |
+          mkdir -p deploy
+          cp -r dist/* deploy/
+          mkdir -p deploy/backend
+          cp -r backend/dist deploy/backend/dist
+          cp backend/package.json deploy/backend/package.json
+          cp backend/package-lock.json deploy/backend/package-lock.json
+          cp -r backend/node_modules deploy/backend/node_modules
+          if [ -f backend/.env ]; then cp backend/.env deploy/backend/.env; fi
+          if [ -d backend/uploads ]; then mkdir -p deploy/backend/uploads; fi
+
+      # ── Deploy ──
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
+          local-dir: ./deploy/
           server-dir: ./
           exclude: |
             **/.git*
