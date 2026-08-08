@@ -46,16 +46,9 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 router.get('/', async (req: Request, res: Response) => {
   const { category_id, is_active, search } = req.query as Record<string, string>;
   let sql = `
-    SELECT p.*, c.name AS category_name,
-      JSON_ARRAYAGG(
-        JSON_OBJECT(
-          'id', pv.id, 'label', pv.label, 'pcs', pv.pcs,
-          'price', pv.price, 'cost_price', pv.cost_price, 'stock', pv.stock
-        )
-      ) AS variants
+    SELECT p.*, c.name AS category_name
     FROM products p
     LEFT JOIN categories c ON c.id = p.category_id
-    LEFT JOIN product_variants pv ON pv.product_id = p.id
     WHERE 1=1
   `;
   const params: unknown[] = [];
@@ -64,12 +57,27 @@ router.get('/', async (req: Request, res: Response) => {
   if (is_active !== undefined) { sql += ' AND p.is_active = ?'; params.push(is_active); }
   if (search) { sql += ' AND p.name LIKE ?'; params.push(`%${search}%`); }
 
-  sql += ' GROUP BY p.id ORDER BY p.created_at DESC';
+  sql += ' ORDER BY p.created_at DESC';
 
   const [rows] = await pool.query<any[]>(sql, params);
+
+  // Fetch variants for all products
+  const productIds = rows.map((r) => r.id);
+  let variantsMap: Record<number, any[]> = {};
+  if (productIds.length > 0) {
+    const [variants] = await pool.query<any[]>(
+      `SELECT * FROM product_variants WHERE product_id IN (${productIds.map(() => '?').join(',')}) ORDER BY id`,
+      productIds
+    );
+    for (const v of variants) {
+      if (!variantsMap[v.product_id]) variantsMap[v.product_id] = [];
+      variantsMap[v.product_id].push(v);
+    }
+  }
+
   const products = rows.map((r) => ({
     ...r,
-    variants: typeof r.variants === 'string' ? JSON.parse(r.variants) : r.variants,
+    variants: variantsMap[r.id] || [],
   }));
   res.json(products);
 });

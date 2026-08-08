@@ -14,9 +14,11 @@ import promotionsRouter from './routes/promotions';
 
 const app = express();
 
-// CORS
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+// CORS — allow all origins for local development
+app.use(cors({ origin: true, credentials: true }));
+
+// Handle preflight requests explicitly (before rate limiters)
+app.options('*', cors({ origin: true, credentials: true }));
 
 // Body parsers
 app.use(express.json({ limit: '10mb' }));
