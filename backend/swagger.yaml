@@ -8,8 +8,10 @@ info:
   contact:
     name: Baba Abdullah Kitchen
 servers:
-  - url: http://localhost:4000
+  - url: http://localhost:3000
     description: Local development
+  - url: https://baba-menu.umsoftware.id
+    description: Production server
 
 components:
   securitySchemes:
