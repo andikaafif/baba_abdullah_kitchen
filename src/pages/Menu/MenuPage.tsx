@@ -12,25 +12,48 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { menuItems } from '../../data/menu';
-import type { MenuCategory } from '../../types';
+import type { MenuItem } from '../../types';
 import MenuCard from '../../components/menu/MenuCard';
 import MenuCardSkeleton from '../../components/menu/MenuCardSkeleton';
 import { useCartStore } from '../../store/cartStore';
 import { useUIStore } from '../../store/uiStore';
+import { storefrontApi, type PublicProduct, API_BASE } from '../../services/storefrontApi';
 
-const categories: Array<'All' | MenuCategory> = ['All', 'Kukus', 'Mentai', 'Cheese', 'Frozen', 'Birthday'];
+function mapProductToMenuItem(p: PublicProduct): MenuItem {
+  const resolveImage = (url: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+  return {
+    id: String(p.id),
+    name: p.name,
+    category: (p.category_name as MenuItem['category']) || 'Kukus',
+    description: p.description || '',
+    variants: p.variants.map((v) => ({ id: v.id, label: v.label, pcs: v.pcs, price: Number(v.price) })),
+    image: resolveImage(p.photo_url),
+  };
+}
 
 const MenuPage: React.FC = () => {
   const cartTotal = useCartStore((s) => s.totalItems());
   const setCartSheetOpen = useUIStore((s) => s.setCartSheetOpen);
   const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState<'All' | MenuCategory>('All');
+  const [activeCategory, setActiveCategory] = useState<string>('All');
   const [loading, setLoading] = useState(true);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<string[]>(['All']);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
+    Promise.all([
+      storefrontApi.getProducts(),
+      storefrontApi.getCategories(),
+    ]).then(([productsRes, categoriesRes]) => {
+      setMenuItems(productsRes.data.map(mapProductToMenuItem));
+      const catNames = categoriesRes.data.map((c) => c.name);
+      setCategories(['All', ...catNames]);
+    }).catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = menuItems.filter((item) => {

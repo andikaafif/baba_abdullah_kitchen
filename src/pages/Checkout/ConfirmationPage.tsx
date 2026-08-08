@@ -18,7 +18,7 @@ import { generatePDF, generatePNG } from '../../services/receiptService';
 import { buildWhatsAppMessage, openWhatsApp } from '../../utils/whatsapp';
 import ReceiptTemplate from '../../components/receipt/ReceiptTemplate';
 import { useCartStore } from '../../store/cartStore';
-import { getShippingFee } from '../../components/checkout/CustomerForm';
+import { storefrontApi } from '../../services/storefrontApi';
 
 interface LocationState {
   customerInfo: CustomerInfo;
@@ -48,12 +48,29 @@ const ConfirmationPage: React.FC = () => {
   if (!state) return null;
 
   const { customerInfo, items, totalPrice, shippingFee: stateFee } = state;
-  const shippingFee = stateFee ?? getShippingFee(customerInfo.deliveryArea);
+  const shippingFee = stateFee ?? 0;
   const grandTotal = totalPrice + shippingFee;
 
   const handleDownloadAndWhatsApp = async () => {
     setLoading(true);
     try {
+      // Submit order to backend API
+      await storefrontApi.createOrder({
+        customer_name: customerInfo.name,
+        customer_phone: customerInfo.phone,
+        customer_address: customerInfo.address,
+        delivery_method: customerInfo.deliveryMethod,
+        payment_method: customerInfo.paymentMethod,
+        notes: customerInfo.notes,
+        items: items.map((item) => ({
+          product_variant_id: item.variant.id,
+          product_name: item.name,
+          variant_label: item.variant.label,
+          quantity: item.quantity,
+          unit_price: item.variant.price,
+        })),
+      });
+
       await generatePDF(items, customerInfo, orderNumber, totalPrice, shippingFee, orderDate);
       await new Promise((r) => setTimeout(r, 500));
       await generatePNG('receipt-template');
@@ -146,7 +163,7 @@ const ConfirmationPage: React.FC = () => {
           // aria-label="Unduh struk dan kirim via WhatsApp"
           sx={{ mb: 2, bgcolor: '#25D366', '&:hover': { bgcolor: '#1EBE59' } }}
         >
-          {loading ? 'Memproses...' : '📥 Unduh Struk & Kirim WhatsApp'}
+          {loading ? 'Memproses...' : '📥 Unduh Struk & Lanjutkan Pesanan melalui WhatsApp'}
         </Button>
       )}
 

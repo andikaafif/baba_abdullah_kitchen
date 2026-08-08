@@ -1,4 +1,5 @@
 export interface MenuVariant {
+  id?: number;
   label: string;
   pcs: string;
   price: number;

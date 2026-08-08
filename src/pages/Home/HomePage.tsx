@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Typography, Button, Container, Grid, Card, CardContent, Avatar } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Button, Container, Grid, Card, CardContent, Avatar, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -7,8 +7,10 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import StarIcon from '@mui/icons-material/Star';
 import GrainIcon from '@mui/icons-material/Grain';
-import { menuItems, featuredMenuIds } from '../../data/menu';
 import MenuCard from '../../components/menu/MenuCard';
+import { storefrontApi, type PublicProduct } from '../../services/storefrontApi';
+import type { MenuItem } from '../../types';
+import { API_BASE } from '../../services/storefrontApi';
 
 const benefits = [
   {
@@ -39,10 +41,36 @@ const benefits = [
   },
 ];
 
-const featuredItems = menuItems.filter((m) => featuredMenuIds.includes(m.id));
+function mapProductToMenuItem(p: PublicProduct): MenuItem {
+  const resolveImage = (url: string | null) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+  return {
+    id: String(p.id),
+    name: p.name,
+    category: (p.category_name as MenuItem['category']) || 'Kukus',
+    description: p.description || '',
+    variants: p.variants.map((v) => ({ id: v.id, label: v.label, pcs: v.pcs, price: Number(v.price) })),
+    image: resolveImage(p.photo_url),
+  };
+}
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    storefrontApi.getProducts()
+      .then((res) => {
+        const products = res.data.slice(0, 4);
+        setFeaturedItems(products.map(mapProductToMenuItem));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <Box>
@@ -200,7 +228,11 @@ const HomePage: React.FC = () => {
             Pilihan dim sum terpopuler yang disukai pelanggan setia kami
           </Typography>
           <Grid container spacing={3}>
-            {featuredItems.map((item) => (
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : featuredItems.map((item) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item.id}>
                 <MenuCard item={item} />
               </Grid>

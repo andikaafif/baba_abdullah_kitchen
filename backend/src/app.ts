@@ -11,6 +11,10 @@ import productsRouter from './routes/products';
 import ordersRouter from './routes/orders';
 import reportsRouter from './routes/reports';
 import promotionsRouter from './routes/promotions';
+import expensesRouter from './routes/expenses';
+import usersRouter from './routes/users';
+import shippingZonesRouter from './routes/shippingZones';
+import settingsRouter from './routes/settings';
 
 const app = express();
 
@@ -59,6 +63,10 @@ app.use('/api/products', apiLimiter, productsRouter);
 app.use('/api/orders', apiLimiter, ordersRouter);
 app.use('/api/reports', apiLimiter, reportsRouter);
 app.use('/api/promotions', apiLimiter, promotionsRouter);
+app.use('/api/expenses', apiLimiter, expensesRouter);
+app.use('/api/users', apiLimiter, usersRouter);
+app.use('/api/shipping-zones', apiLimiter, shippingZonesRouter);
+app.use('/api/settings', apiLimiter, settingsRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'baba-abdullah-kitchen-api' }));

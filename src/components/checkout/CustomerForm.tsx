@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   TextField,
@@ -13,40 +13,21 @@ import {
   InputLabel,
   FormHelperText,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { CustomerInfo } from '../../types';
-
-export const DELIVERY_AREAS = [
-  'Galaxy Kota Bekasi',
-  'Kemang Pratama Kota Bekasi',
-  'Rawa Lumbu Kota Bekasi',
-  'Taman Narogong Indah Kota Bekasi',
-  'Pondok Timur Indah Kota Bekasi',
-  'Pondok Hijau Kota Bekasi',
-  'Jatimulya Kota Bekasi',
-  'Grandwisata Kota Bekasi',
-  'Familia Urban Bekasi',
-  'Mustika Jaya Kota Bekasi',
-  'Mustika Sari Kota Bekasi',
-  'Pedurenan Kota Bekasi',
-];
-
-// Areas that are exempt from the shipping fee
-export const FREE_DELIVERY_AREAS = [
-  'Familia Urban Bekasi',
-  'Mustika Sari Kota Bekasi',
-  'Jatimulya Kota Bekasi',
-  'Mustika Jaya Kota Bekasi',
-];
+import { storefrontApi, type PublicShippingZone } from '../../services/storefrontApi';
+import { formatRupiah } from '../../utils/format';
 
 export const SHIPPING_FEE = 10000;
 
-export function getShippingFee(area?: string): number {
-  if (!area) return 0;
-  return FREE_DELIVERY_AREAS.includes(area) ? 0 : SHIPPING_FEE;
+export function getShippingFee(area?: string, zones?: PublicShippingZone[]): number {
+  if (!area || !zones) return 0;
+  const zone = zones.find((z) => z.zone_name === area);
+  return zone ? Number(zone.shipping_cost) : 0;
 }
 
 const schema = z
@@ -74,9 +55,23 @@ type FormData = z.infer<typeof schema>;
 interface CustomerFormProps {
   onSubmit: (data: CustomerInfo) => void;
   defaultValues?: Partial<CustomerInfo>;
+  onShippingZonesLoaded?: (zones: PublicShippingZone[]) => void;
 }
 
-const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues }) => {
+const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues, onShippingZonesLoaded }) => {
+  const [shippingZones, setShippingZones] = useState<PublicShippingZone[]>([]);
+  const [zonesLoading, setZonesLoading] = useState(true);
+
+  useEffect(() => {
+    storefrontApi.getShippingZones()
+      .then((res) => {
+        setShippingZones(res.data);
+        onShippingZonesLoaded?.(res.data);
+      })
+      .catch(() => {})
+      .finally(() => setZonesLoading(false));
+  }, []);
+
   const {
     control,
     handleSubmit,
@@ -210,33 +205,34 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues }) 
 
       {deliveryMethod === 'Delivery' && (        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Alert severity="info" sx={{ fontSize: '0.8rem' }}>
-            Pengiriman hanya tersedia untuk area Kota Bekasi berikut. Area selain Familia Urban
-            Bekasi, Mustika Sari, Jatimulya, dan Mustika Jaya dikenakan ongkos kirim Rp 10.000.
+            Pengiriman tersedia untuk area yang terdaftar. Biaya kirim sesuai zona pengiriman.
           </Alert>
-          <Controller
-            name="deliveryArea"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth required error={!!errors.deliveryArea}>
-                <InputLabel id="delivery-area-label">Area Pengiriman</InputLabel>
-                <Select
-                  {...field}
-                  labelId="delivery-area-label"
-                  label="Area Pengiriman"
-                  inputProps={{ 'aria-label': 'Area pengiriman' }}
-                >
-                  {DELIVERY_AREAS.map((area) => (
-                    <MenuItem key={area} value={area}>
-                      {area}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.deliveryArea && (
-                  <FormHelperText>{errors.deliveryArea.message}</FormHelperText>
-                )}
-              </FormControl>
-            )}
-          />
+          {zonesLoading ? <CircularProgress size={24} /> : (
+            <Controller
+              name="deliveryArea"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth required error={!!errors.deliveryArea}>
+                  <InputLabel id="delivery-area-label">Area Pengiriman</InputLabel>
+                  <Select
+                    {...field}
+                    labelId="delivery-area-label"
+                    label="Area Pengiriman"
+                    inputProps={{ 'aria-label': 'Area pengiriman' }}
+                  >
+                    {shippingZones.map((zone) => (
+                      <MenuItem key={zone.id} value={zone.zone_name}>
+                        {zone.zone_name} — {Number(zone.shipping_cost) === 0 ? 'Gratis' : formatRupiah(Number(zone.shipping_cost))}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.deliveryArea && (
+                    <FormHelperText>{errors.deliveryArea.message}</FormHelperText>
+                  )}
+                </FormControl>
+              )}
+            />
+          )}
         </Box>
       )}
 

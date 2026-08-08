@@ -14,6 +14,11 @@ import {
   Menu as MenuIcon,
   Restaurant as RestaurantIcon,
   Category as CategoryIcon,
+  Receipt as ReceiptIcon,
+  People as PeopleIcon,
+  LocalShipping as ShippingIcon,
+  Construction as MaintenanceIcon,
+  ShoppingBag as OrdersIcon,
 } from '@mui/icons-material';
 import { useAuthStore } from '../../store/authStore';
 
@@ -21,11 +26,16 @@ const DRAWER_WIDTH = 240;
 
 const NAV_ITEMS = [
   { label: 'Overview', path: '/dashboard', icon: <DashboardIcon /> },
+  { label: 'Pesanan', path: '/dashboard/orders', icon: <OrdersIcon /> },
   { label: 'Produk', path: '/dashboard/products', icon: <RestaurantIcon /> },
   { label: 'Inventori', path: '/dashboard/inventory', icon: <InventoryIcon /> },
   { label: 'Laporan', path: '/dashboard/reports', icon: <BarChartIcon /> },
+  { label: 'Pengeluaran', path: '/dashboard/expenses', icon: <ReceiptIcon /> },
   { label: 'Promosi', path: '/dashboard/promotions', icon: <PromotionIcon /> },
   { label: 'Kategori', path: '/dashboard/categories', icon: <CategoryIcon /> },
+  { label: 'Pengiriman', path: '/dashboard/shipping-zones', icon: <ShippingIcon /> },
+  { label: 'Pengguna', path: '/dashboard/users', icon: <PeopleIcon /> },
+  { label: 'Maintenance', path: '/dashboard/maintenance', icon: <MaintenanceIcon /> },
 ];
 
 const SIDEBAR_BG = '#2D1A0E';

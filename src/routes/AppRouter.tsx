@@ -22,6 +22,11 @@ const InventoryPage = lazy(() => import('../pages/Dashboard/inventory/InventoryP
 const ReportsPage = lazy(() => import('../pages/Dashboard/reports/ReportsPage'));
 const PromotionListPage = lazy(() => import('../pages/Dashboard/promotions/PromotionListPage'));
 const PromotionFormPage = lazy(() => import('../pages/Dashboard/promotions/PromotionFormPage'));
+const ExpensesPage = lazy(() => import('../pages/Dashboard/expenses/ExpensesPage'));
+const UsersPage = lazy(() => import('../pages/Dashboard/users/UsersPage'));
+const ShippingZonesPage = lazy(() => import('../pages/Dashboard/shipping/ShippingZonesPage'));
+const MaintenancePage = lazy(() => import('../pages/Dashboard/settings/MaintenancePage'));
+const OrdersPage = lazy(() => import('../pages/Dashboard/orders/OrdersPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,9 +65,14 @@ const AppRouter: React.FC = () => (
             <Route path="inventory" element={<InventoryPage />} />
             <Route path="inventory/:id" element={<InventoryPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="orders" element={<OrdersPage />} />
             <Route path="promotions" element={<PromotionListPage />} />
             <Route path="promotions/new" element={<PromotionFormPage />} />
             <Route path="promotions/:id" element={<PromotionFormPage />} />
+            <Route path="expenses" element={<ExpensesPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="shipping-zones" element={<ShippingZonesPage />} />
+            <Route path="maintenance" element={<MaintenancePage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

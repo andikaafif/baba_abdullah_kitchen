@@ -1,5 +1,6 @@
 export function formatRupiah(amount: number): string {
-  return 'Rp' + amount.toLocaleString('id-ID').replace(/,/g, '.');
+  const num = Number(amount);
+  return 'Rp' + num.toLocaleString('id-ID').replace(/,/g, '.');
 }
 
 export function generateOrderNumber(): string {

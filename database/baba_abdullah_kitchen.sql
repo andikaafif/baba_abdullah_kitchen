@@ -171,6 +171,42 @@ CREATE TABLE `admin_users` (
   UNIQUE KEY `uq_admin_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ------------------------------------------------------------
+-- Table: expenses
+-- ------------------------------------------------------------
+CREATE TABLE `expenses` (
+  `id`             INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+  `purpose`        VARCHAR(255)     NOT NULL COMMENT 'Purpose/description of the expense',
+  `quantity`       INT UNSIGNED     NOT NULL DEFAULT 1,
+  `original_price` DECIMAL(12,2)   NOT NULL DEFAULT 0.00,
+  `expense_cost`   DECIMAL(14,2)   GENERATED ALWAYS AS (`original_price` * `quantity`) STORED,
+  `created_at`     TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_expenses_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Table: shipping_zones
+-- ------------------------------------------------------------
+CREATE TABLE `shipping_zones` (
+  `id`            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+  `zone_name`     VARCHAR(200)     NOT NULL,
+  `shipping_cost` DECIMAL(12,2)    NOT NULL DEFAULT 0.00,
+  `created_at`    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Table: site_settings
+-- ------------------------------------------------------------
+CREATE TABLE `site_settings` (
+  `key`   VARCHAR(100) NOT NULL,
+  `value` TEXT         DEFAULT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `site_settings` (`key`, `value`) VALUES ('maintenance_mode', 'false');
+
 -- ============================================================
 -- VIEWS
 -- ============================================================

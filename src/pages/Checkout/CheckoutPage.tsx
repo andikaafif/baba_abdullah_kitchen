@@ -17,8 +17,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
 import CustomerForm from '../../components/checkout/CustomerForm';
+import { getShippingFee } from '../../components/checkout/CustomerForm';
 import type { CustomerInfo } from '../../types';
 import { formatRupiah } from '../../utils/format';
+import type { PublicShippingZone } from '../../services/storefrontApi';
 
 const steps = ['Informasi Pelanggan', 'Ringkasan Pesanan'];
 
@@ -27,6 +29,7 @@ const CheckoutPage: React.FC = () => {
   const { items, totalPrice } = useCartStore();
   const [activeStep, setActiveStep] = useState(0);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
+  const [shippingZones, setShippingZones] = useState<PublicShippingZone[]>([]);
 
   if (items.length === 0) {
     return (
@@ -51,7 +54,8 @@ const CheckoutPage: React.FC = () => {
 
   const handlePlaceOrder = () => {
     if (!customerInfo) return;
-    navigate('/confirmation', { state: { customerInfo, items, totalPrice: totalPrice() } });
+    const shippingFee = getShippingFee(customerInfo.deliveryArea, shippingZones);
+    navigate('/confirmation', { state: { customerInfo, items, totalPrice: totalPrice(), shippingFee } });
   };
 
   return (
@@ -85,6 +89,7 @@ const CheckoutPage: React.FC = () => {
           <CustomerForm
             onSubmit={handleCustomerFormSubmit}
             defaultValues={customerInfo || undefined}
+            onShippingZonesLoaded={setShippingZones}
           />
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
             <Button
@@ -134,12 +139,23 @@ const CheckoutPage: React.FC = () => {
               </Box>
             ))}
             <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="body2">Subtotal</Typography>
+              <Typography variant="body2">{formatRupiah(totalPrice())}</Typography>
+            </Box>
+            {getShippingFee(customerInfo.deliveryArea, shippingZones) > 0 && (
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                <Typography variant="body2" color="text.secondary">Ongkos Kirim</Typography>
+                <Typography variant="body2" color="text.secondary">{formatRupiah(getShippingFee(customerInfo.deliveryArea, shippingZones))}</Typography>
+              </Box>
+            )}
+            <Divider sx={{ my: 1 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="h6" fontWeight={700}>
-                Total
+                Total Bayar
               </Typography>
               <Typography variant="h6" fontWeight={700} color="primary">
-                {formatRupiah(totalPrice())}
+                {formatRupiah(totalPrice() + getShippingFee(customerInfo.deliveryArea, shippingZones))}
               </Typography>
             </Box>
           </Paper>

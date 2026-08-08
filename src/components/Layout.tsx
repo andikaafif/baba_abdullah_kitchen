@@ -15,6 +15,7 @@ import {
   Snackbar,
   Alert,
   Tooltip,
+  Container,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
@@ -23,10 +24,12 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import ContrastIcon from '@mui/icons-material/Contrast';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import { useUIStore } from '../store/uiStore';
 import CartBottomSheet from './cart/CartBottomSheet';
+import { storefrontApi } from '../services/storefrontApi';
 
 const navItems = [
   { label: 'Home', path: '/', icon: <HomeIcon /> },
@@ -43,6 +46,13 @@ const Layout: React.FC = () => {
     useUIStore();
   const [offline, setOffline] = useState(!navigator.onLine);
   const [offlineSnackbar, setOfflineSnackbar] = useState(false);
+  const [maintenance, setMaintenance] = useState(false);
+
+  useEffect(() => {
+    storefrontApi.getMaintenanceMode()
+      .then((res) => setMaintenance(res.data.maintenance_mode))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const onOffline = () => {
@@ -59,6 +69,25 @@ const Layout: React.FC = () => {
       window.removeEventListener('online', onOnline);
     };
   }, []);
+
+  if (maintenance) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', justifyContent: 'center', alignItems: 'center', bgcolor: '#FFF8F0' }}>
+        <Container maxWidth="sm" sx={{ textAlign: 'center', py: 8 }}>
+          <ConstructionIcon sx={{ fontSize: 80, color: '#8B4513', mb: 2 }} />
+          <Typography variant="h4" fontWeight={700} color="#8B4513" gutterBottom>
+            Sedang Dalam Pemeliharaan
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+            Website kami sedang dalam proses pemeliharaan. Silakan kembali beberapa saat lagi.
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Untuk pemesanan, silakan hubungi kami via WhatsApp: +62 822-6007-0364
+          </Typography>
+        </Container>
+      </Box>
+    );
+  }
 
   const currentNavValue = navItems.findIndex((n) => n.path === location.pathname);
 
