@@ -1,5 +1,6 @@
 import type { MenuItem } from '../types';
 import imgKukusOriginal from '../assets/product_image/kukus_original.jpeg';
+import imgBirthdayDimsum from '../assets/product_image/birthday_dimsum.jpeg';
 import imgMentai from '../assets/product_image/mentai.jpeg';
 import imgMentaiMixOriginal from '../assets/product_image/mentai_mix_original.jpeg';
 import imgCheeseCheddar from '../assets/product_image/cheese_cheddar.jpeg';
@@ -33,6 +34,19 @@ export const menuItems: MenuItem[] = [
       { label: 'Family Pack', pcs: '12 pcs', price: 60000 },
     ],
     image: imgMentai,
+  },
+  {
+    id: 'birthday-dimsum',
+    name: 'Birthday Dimsum',
+    category: 'Kukus',
+    description:
+      'Dimsum spesial untuk merayakan momen istimewa dengan isian daging pilihan yang lembut dan gurih.',
+    variants: [
+      { label: 'Regular', pcs: '12 pcs', price: 90000 - 95000 },
+      { label: 'Medium', pcs: '15 pcs', price: 115000 },
+      { label: 'Large', pcs: '20 pcs', price: 150000 },
+    ],
+    image: imgBirthdayDimsum,
   },
   {
     id: 'mentai-mix-original',
