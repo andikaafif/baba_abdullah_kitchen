@@ -38,11 +38,12 @@ export const menuItems: MenuItem[] = [
   {
     id: 'birthday-dimsum',
     name: 'Birthday Dimsum',
-    category: 'Kukus',
+    category: 'Birthday',
     description:
       'Dimsum spesial untuk merayakan momen istimewa dengan isian daging pilihan yang lembut dan gurih.',
     variants: [
-      { label: 'Regular', pcs: '12 pcs', price: 90000 - 95000 },
+      { label: 'Regular Paket 1', pcs: '12 pcs', price: 90000},
+      { label: 'Regular Paket 2', pcs: '12 pcs', price: 95000},
       { label: 'Medium', pcs: '15 pcs', price: 115000 },
       { label: 'Large', pcs: '20 pcs', price: 150000 },
     ],
@@ -98,4 +99,4 @@ export const menuItems: MenuItem[] = [
   },
 ];
 
-export const featuredMenuIds = ['kukus-original', 'mentai-regular', 'cheese-cheddar', 'frozen'];
+export const featuredMenuIds = ['kukus-original', 'mentai-regular', 'cheese-cheddar', 'frozen', 'birthday-dimsum'];

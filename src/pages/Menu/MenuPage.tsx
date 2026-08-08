@@ -19,7 +19,7 @@ import MenuCardSkeleton from '../../components/menu/MenuCardSkeleton';
 import { useCartStore } from '../../store/cartStore';
 import { useUIStore } from '../../store/uiStore';
 
-const categories: Array<'All' | MenuCategory> = ['All', 'Kukus', 'Mentai', 'Cheese', 'Frozen'];
+const categories: Array<'All' | MenuCategory> = ['All', 'Kukus', 'Mentai', 'Cheese', 'Frozen', 'Birthday'];
 
 const MenuPage: React.FC = () => {
   const cartTotal = useCartStore((s) => s.totalItems());

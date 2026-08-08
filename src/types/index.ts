@@ -4,7 +4,7 @@ export interface MenuVariant {
   price: number;
 }
 
-export type MenuCategory = 'Kukus' | 'Mentai' | 'Cheese' | 'Frozen';
+export type MenuCategory = 'Kukus' | 'Mentai' | 'Cheese' | 'Frozen' | 'Birthday';
 
 export interface MenuItem {
   id: string;
