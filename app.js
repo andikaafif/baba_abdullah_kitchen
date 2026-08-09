@@ -4,14 +4,18 @@ const path = require('path');
 // Load env from backend/.env if present
 dotenv.config({ path: path.join(__dirname, 'backend', '.env') });
 
+// Use express from backend/node_modules
+const express = require(path.join(__dirname, 'backend', 'node_modules', 'express'));
 const app = require('./backend/dist/app').default;
-const express = require('express');
 
-// Serve frontend static files
-app.use(express.static(__dirname, { index: 'index.html' }));
+// Serve frontend static files (but not index.html for missing paths)
+app.use(express.static(__dirname, { index: false }));
 
-// SPA fallback — serve index.html for non-API routes
-app.get(/^(?!\/api\/).*/, (_req, res) => {
+// SPA fallback — serve index.html for non-API, non-uploads routes
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+    return next();
+  }
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
