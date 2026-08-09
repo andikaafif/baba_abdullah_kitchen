@@ -1,1 +1,6 @@
-# Do not add rewrite rules here — cPanel Passenger handles routing via app.js
+# DO NOT REMOVE - Passenger Node.js Configuration
+PassengerAppRoot "/home/mustsee02/baba-menu.umsoftware.id"
+PassengerBaseURI "/"
+PassengerNodejs "/home/mustsee02/nodevenv/baba-menu.umsoftware.id/20/bin/node"
+PassengerAppType node
+PassengerStartupFile app.js
