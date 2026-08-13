@@ -1,5 +1,5 @@
-const dotenv = require('dotenv');
 const path = require('path');
+const dotenv = require(path.join(__dirname, 'backend', 'node_modules', 'dotenv'));
 
 // Load env from backend/.env if present
 dotenv.config({ path: path.join(__dirname, 'backend', '.env') });
