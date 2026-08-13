@@ -1,5 +1,5 @@
 # DO NOT REMOVE - Passenger Node.js Configuration
-PassengerAppRoot "/home/mustsee02/baba-menu.umsoftware.id"
+PassengerAppRoot "/home/mustsee02/baba-menu.umsoftware.id/backend"
 PassengerBaseURI "/"
 PassengerNodejs "/home/mustsee02/nodevenv/baba-menu.umsoftware.id/20/bin/node"
 PassengerAppType node
