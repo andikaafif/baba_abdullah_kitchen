@@ -40,17 +40,17 @@ jobs:
       - name: Create backend .env
         working-directory: ./backend
         run: |
-          cat <<EOF > .env
-          PORT=3000
-          DB_PORT=3306
-          DB_HOST=localhost
-          DB_USER=${{ secrets.DB_USER }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          UPLOAD_DIR=./uploads
-          ALLOWED_ORIGINS=https://baba-menu.umsoftware.id
-          EOF
+          printf '%s\n' \
+            "PORT=3000" \
+            "DB_PORT=3306" \
+            "DB_HOST=localhost" \
+            "DB_USER=${{ secrets.DB_USER }}" \
+            "DB_NAME=${{ secrets.DB_NAME }}" \
+            "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
+            "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
+            "UPLOAD_DIR=./uploads" \
+            "ALLOWED_ORIGINS=https://baba-menu.umsoftware.id" \
+            > .env
 
       # ── Prepare deploy bundle ──
       - name: Prepare deploy directory
@@ -65,6 +65,7 @@ jobs:
           cp backend/package-lock.json deploy/backend/package-lock.json
           cp -r backend/node_modules deploy/backend/node_modules
           cp backend/.env deploy/backend/.env
+          cp backend/swagger.yaml deploy/backend/swagger.yaml
           mkdir -p deploy/backend/uploads
 
       # ── Deploy ──
@@ -79,3 +80,4 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
+            backend/uploads/**
