@@ -67,6 +67,8 @@ jobs:
           cp backend/.env deploy/backend/.env
           cp backend/swagger.yaml deploy/backend/swagger.yaml
           mkdir -p deploy/backend/uploads
+          mkdir -p deploy/tmp
+          touch deploy/tmp/restart.txt
 
       # ── Deploy ──
       - name: Deploy via FTP
