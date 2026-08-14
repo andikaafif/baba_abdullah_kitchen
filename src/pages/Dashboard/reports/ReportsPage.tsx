@@ -39,22 +39,22 @@ const ReportsPage: React.FC = () => {
   const { from, to } = getDefaultRange(period);
 
   const { data: salesData, isLoading: loadingSales } = useQuery({
-    queryKey: ['report-sales', period],
+    queryKey: ['report-sales', period, from, to],
     queryFn: () => reportApi.sales(period, from, to).then((r) => r.data),
   });
 
   const { data: profitData, isLoading: loadingProfit } = useQuery({
-    queryKey: ['report-profit', period],
+    queryKey: ['report-profit', period, from, to],
     queryFn: () => reportApi.profit(period, from, to).then((r) => r.data),
   });
 
   const { data: topVariants, isLoading: loadingTop } = useQuery({
-    queryKey: ['report-top-variants', period],
+    queryKey: ['report-top-variants', period, from, to],
     queryFn: () => reportApi.topVariants({ limit: 10, from, to }).then((r) => r.data),
   });
 
   const { data: tableData, isLoading: loadingTable } = useQuery({
-    queryKey: ['report-table', period],
+    queryKey: ['report-table', period, from, to],
     queryFn: () => reportApi.salesTable(from, to).then((r) => r.data as any[]),
   });
 
@@ -256,7 +256,7 @@ const ReportsPage: React.FC = () => {
                             />
                           </TableCell>
                           <TableCell sx={{ fontSize: 12 }}>
-                            {new Date(row.created_at).toLocaleDateString('id-ID')}
+                            {(() => { const d = new Date(row.created_at); const p = (n: number) => String(n).padStart(2, '0'); return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; })()}
                           </TableCell>
                         </TableRow>
                       ))}
