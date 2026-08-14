@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, CardContent, Tabs, Tab,
   ToggleButton, ToggleButtonGroup, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper,
-  CircularProgress, Chip,
+  CircularProgress, Chip, TablePagination,
 } from '@mui/material';
 import { FileDownload } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
@@ -20,17 +20,22 @@ const formatRp = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
 function getDefaultRange(period: Period) {
-  const to = new Date().toISOString().slice(0, 10);
-  const from = new Date();
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const toStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   if (period === 'daily') from.setDate(from.getDate() - 29);
   else if (period === 'weekly') from.setDate(from.getDate() - 83);
   else from.setMonth(from.getMonth() - 11);
-  return { from: from.toISOString().slice(0, 10), to };
+  const fromStr = `${from.getFullYear()}-${pad(from.getMonth() + 1)}-${pad(from.getDate())}`;
+  return { from: fromStr, to: toStr };
 }
 
 const ReportsPage: React.FC = () => {
   const [tab, setTab] = useState(0);
   const [period, setPeriod] = useState<Period>('daily');
+  const [tablePage, setTablePage] = useState(0);
+  const rowsPerPage = 15;
   const { from, to } = getDefaultRange(period);
 
   const { data: salesData, isLoading: loadingSales } = useQuery({
@@ -234,7 +239,7 @@ const ReportsPage: React.FC = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {tableData?.map((row: any) => (
+                      {tableData?.slice(tablePage * rowsPerPage, tablePage * rowsPerPage + rowsPerPage).map((row: any) => (
                         <TableRow key={row.order_number} hover sx={{ '&:nth-of-type(even)': { bgcolor: '#FFFAF5' } }}>
                           <TableCell sx={{ fontSize: 12 }}>{row.order_number}</TableCell>
                           <TableCell sx={{ fontSize: 12 }}>{row.customer_name}</TableCell>
@@ -257,6 +262,14 @@ const ReportsPage: React.FC = () => {
                       ))}
                     </TableBody>
                   </Table>
+                  <TablePagination
+                    component="div"
+                    count={tableData?.length ?? 0}
+                    page={tablePage}
+                    onPageChange={(_e, p) => setTablePage(p)}
+                    rowsPerPage={rowsPerPage}
+                    rowsPerPageOptions={[15]}
+                  />
                 </TableContainer>
               )}
             </Box>

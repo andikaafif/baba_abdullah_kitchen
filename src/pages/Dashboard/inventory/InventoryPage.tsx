@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, TextField, Button,
-  IconButton, Alert, CircularProgress, Chip, InputAdornment,
+  IconButton, Alert, CircularProgress, Chip, InputAdornment, TablePagination,
 } from '@mui/material';
 import { ArrowBack, Save, Search } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,6 +15,8 @@ const InventoryPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [stockEdits, setStockEdits] = useState<Record<number, { stock: string; reason: string }>>({});
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 15;
 
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products-inventory', search],
@@ -106,16 +108,20 @@ const InventoryPage: React.FC = () => {
                   <CircularProgress />
                 </TableCell>
               </TableRow>
-            ) : (
-              products?.flatMap((p) =>
-                (p.variants ?? []).map((v, vi) => (
+            ) : (() => {
+              const allRows = products?.flatMap((p) =>
+                (p.variants ?? []).map((v, vi) => ({ product: p, variant: v, isFirstVariant: vi === 0 }))
+              ) ?? [];
+              return (
+                <>
+                  {allRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(({ product: p, variant: v, isFirstVariant }) => (
                   <TableRow
                     key={v.id}
                     hover
                     sx={{ '&:nth-of-type(even)': { bgcolor: '#FFFAF5' } }}
                   >
                     <TableCell>
-                      {vi === 0 && (
+                      {isFirstVariant && (
                         <Typography variant="body2" fontWeight={600}>{p.name}</Typography>
                       )}
                     </TableCell>
@@ -165,11 +171,21 @@ const InventoryPage: React.FC = () => {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))
-              )
-            )}
+                  ))}
+                </>
+              );
+            })()
+            }
           </TableBody>
         </Table>
+        <TablePagination
+          component="div"
+          count={products?.flatMap((p) => p.variants ?? []).length ?? 0}
+          page={page}
+          onPageChange={(_e, p) => setPage(p)}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[15]}
+        />
       </TableContainer>
     </Box>
   );

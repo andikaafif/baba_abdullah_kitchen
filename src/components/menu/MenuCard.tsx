@@ -36,9 +36,13 @@ const categoryColors: Record<string, string> = {
 
 const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
   const addItem = useCartStore((s) => s.addItem);
-  const [selectedVariant, setSelectedVariant] = useState<MenuVariant>(item.variants[0]);
+  const [selectedVariant, setSelectedVariant] = useState<MenuVariant>(
+    item.variants.find((v) => (v.stock ?? 0) > 0) ?? item.variants[0]
+  );
   const [quantity, setQuantity] = useState(1);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const isOutOfStock = (selectedVariant.stock ?? 0) <= 0;
 
   const handleAddToCart = () => {
     addItem(item, selectedVariant, quantity);
@@ -100,8 +104,8 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
               aria-label={`Pilih varian ${item.name}`}
             >
               {item.variants.map((v) => (
-                <MuiMenuItem key={v.label} value={v.label}>
-                  {v.label} ({v.pcs}) — {formatRupiah(v.price)}
+                <MuiMenuItem key={v.label} value={v.label} disabled={(v.stock ?? 0) <= 0}>
+                  {v.label} ({v.pcs}) — {formatRupiah(v.price)}{(v.stock ?? 0) <= 0 ? ' (Habis)' : ''}
                 </MuiMenuItem>
               ))}
             </Select>
@@ -148,9 +152,10 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
             fullWidth
             startIcon={<AddShoppingCartIcon />}
             onClick={handleAddToCart}
+            disabled={isOutOfStock}
             aria-label={`Tambah ${item.name} ke keranjang`}
           >
-            Tambah ke Keranjang
+            {isOutOfStock ? 'Stok Habis' : 'Tambah ke Keranjang'}
           </Button>
         </CardActions>
       </Card>

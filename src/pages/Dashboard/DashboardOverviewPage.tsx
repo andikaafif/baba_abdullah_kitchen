@@ -35,8 +35,9 @@ const formatRp = (n: number) =>
 
 const DashboardOverviewPage: React.FC = () => {
   const today = new Date();
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().slice(0, 10);
-  const todayStr = today.toISOString().slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const monthStart = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-01`;
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
   const { data: monthlySales, isLoading: loadingMonthly } = useQuery({
     queryKey: ['overview-monthly'],

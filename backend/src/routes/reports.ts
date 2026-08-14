@@ -9,8 +9,8 @@ const router = Router();
 function dateFilter(from?: string, to?: string, col = 'o.created_at') {
   const clauses: string[] = [];
   const params: string[] = [];
-  if (from) { clauses.push(`DATE(${col}) >= ?`); params.push(from); }
-  if (to) { clauses.push(`DATE(${col}) <= ?`); params.push(to); }
+  if (from) { clauses.push(`DATE_FORMAT(${col}, '%Y-%m-%d') >= ?`); params.push(from); }
+  if (to) { clauses.push(`DATE_FORMAT(${col}, '%Y-%m-%d') <= ?`); params.push(to); }
   return { clause: clauses.length ? ' AND ' + clauses.join(' AND ') : '', params };
 }
 
@@ -53,7 +53,7 @@ router.get('/sales', authMiddleware, async (req: Request, res: Response) => {
     label = "DATE_FORMAT(o.created_at, '%Y-%m')";
   } else {
     groupBy = "DATE(o.created_at)";
-    label = "DATE(o.created_at)";
+    label = "DATE_FORMAT(o.created_at, '%Y-%m-%d')";
   }
 
   const sql = `
@@ -68,7 +68,7 @@ router.get('/sales', authMiddleware, async (req: Request, res: Response) => {
     ORDER BY MIN(o.created_at) ASC
   `;
   const [rows] = await pool.query<any[]>(sql, params);
-  res.json(rows);
+  res.json(rows.map((r) => ({ ...r, order_count: Number(r.order_count), total_revenue: Number(r.total_revenue) })));
 });
 
 /**
@@ -94,7 +94,7 @@ router.get('/profit', authMiddleware, async (req: Request, res: Response) => {
     label = "DATE_FORMAT(o.created_at, '%Y-%m')";
   } else {
     groupBy = "DATE(o.created_at)";
-    label = "DATE(o.created_at)";
+    label = "DATE_FORMAT(o.created_at, '%Y-%m-%d')";
   }
 
   const sql = `
@@ -110,7 +110,7 @@ router.get('/profit', authMiddleware, async (req: Request, res: Response) => {
     ORDER BY MIN(o.created_at) ASC
   `;
   const [rows] = await pool.query<any[]>(sql, params);
-  res.json(rows);
+  res.json(rows.map((r) => ({ ...r, order_count: Number(r.order_count), total_revenue: Number(r.total_revenue), total_profit: Number(r.total_profit) })));
 });
 
 /**
@@ -165,7 +165,7 @@ router.get('/top-variants', authMiddleware, async (req: Request, res: Response) 
   `;
   extra.push(Number(limit));
   const [rows] = await pool.query<any[]>(sql, extra);
-  res.json(rows);
+  res.json(rows.map((r) => ({ ...r, total_sold: Number(r.total_sold), total_revenue: Number(r.total_revenue) })));
 });
 
 /**

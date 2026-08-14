@@ -7,11 +7,11 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+07:00";
 
-CREATE DATABASE IF NOT EXISTS `baba_abdullah_kitchen`
+CREATE DATABASE IF NOT EXISTS `mustsee02_baba_menu`
   DEFAULT CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE `baba_abdullah_kitchen`;
+USE `mustsee02_baba_menu`;
 
 -- ------------------------------------------------------------
 -- Table: categories

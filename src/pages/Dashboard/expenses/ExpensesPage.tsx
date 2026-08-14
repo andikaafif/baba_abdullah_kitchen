@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, CardContent, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, Button, TextField,
   Dialog, DialogTitle, DialogContent, DialogActions, IconButton,
-  ToggleButton, ToggleButtonGroup, CircularProgress, Chip,
+  ToggleButton, ToggleButtonGroup, CircularProgress, Chip, TablePagination,
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,12 +13,15 @@ const formatRp = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
 function getDefaultRange(period: ExpensePeriod) {
-  const to = new Date().toISOString().slice(0, 10);
-  const from = new Date();
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const toStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   if (period === 'daily') from.setDate(from.getDate() - 29);
   else if (period === 'weekly') from.setDate(from.getDate() - 83);
   else from.setMonth(from.getMonth() - 11);
-  return { from: from.toISOString().slice(0, 10), to };
+  const fromStr = `${from.getFullYear()}-${pad(from.getMonth() + 1)}-${pad(from.getDate())}`;
+  return { from: fromStr, to: toStr };
 }
 
 const ExpensesPage: React.FC = () => {
@@ -26,6 +29,8 @@ const ExpensesPage: React.FC = () => {
   const [period, setPeriod] = useState<ExpensePeriod>('daily');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ purpose: '', quantity: 1, original_price: 0 });
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 15;
   const { from, to } = getDefaultRange(period);
 
   const { data: expenses, isLoading } = useQuery({
@@ -102,7 +107,7 @@ const ExpensesPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {expenses?.map((e) => (
+              {expenses?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((e) => (
                 <TableRow key={e.id}>
                   <TableCell>{e.purpose}</TableCell>
                   <TableCell align="right">{e.quantity}</TableCell>
@@ -121,6 +126,14 @@ const ExpensesPage: React.FC = () => {
               )}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={expenses?.length ?? 0}
+            page={page}
+            onPageChange={(_e, p) => setPage(p)}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[15]}
+          />
         </TableContainer>
       )}
 
