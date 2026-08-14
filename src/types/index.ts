@@ -3,6 +3,7 @@ export interface MenuVariant {
   label: string;
   pcs: string;
   price: number;
+  stock?: number;
 }
 
 export type MenuCategory = 'Kukus' | 'Mentai' | 'Cheese' | 'Frozen' | 'Birthday';

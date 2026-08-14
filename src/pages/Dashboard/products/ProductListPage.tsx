@@ -5,7 +5,7 @@ import {
   Chip, IconButton, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Dialog, DialogTitle, DialogContent,
   DialogActions, CircularProgress, Alert, Avatar, Select, MenuItem,
-  FormControl, InputLabel,
+  FormControl, InputLabel, TablePagination,
 } from '@mui/material';
 import {
   Add, Search, Edit, Delete, Inventory as InventoryIcon,
@@ -24,6 +24,8 @@ const ProductListPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 15;
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
@@ -111,7 +113,7 @@ const ProductListPage: React.FC = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              products?.map((p) => (
+              products?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((p) => (
                 <TableRow key={p.id} hover sx={{ '&:nth-of-type(even)': { bgcolor: '#FFFAF5' } }}>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -192,6 +194,14 @@ const ProductListPage: React.FC = () => {
             )}
           </TableBody>
         </Table>
+        <TablePagination
+          component="div"
+          count={products?.length ?? 0}
+          page={page}
+          onPageChange={(_e, p) => setPage(p)}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[15]}
+        />
       </TableContainer>
 
       {/* Delete confirmation */}

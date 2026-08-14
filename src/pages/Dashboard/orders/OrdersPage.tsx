@@ -4,6 +4,7 @@ import {
   TableHead, TableRow, Paper, Chip, IconButton, Select, MenuItem,
   FormControl, CircularProgress, Dialog, DialogTitle, DialogContent,
   DialogActions, Button, Tooltip, ToggleButtonGroup, ToggleButton,
+  TablePagination,
 } from '@mui/material';
 import { Visibility, WhatsApp } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -41,6 +42,8 @@ const OrdersPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 15;
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ['orders', statusFilter],
@@ -121,7 +124,7 @@ const OrdersPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {orders?.map((order) => (
+              {orders?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((order) => (
                 <TableRow key={order.id}>
                   <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>{order.order_number}</TableCell>
                   <TableCell>{order.customer_name}</TableCell>
@@ -169,6 +172,14 @@ const OrdersPage: React.FC = () => {
               )}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={orders?.length ?? 0}
+            page={page}
+            onPageChange={(_e, p) => setPage(p)}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[15]}
+          />
         </TableContainer>
       )}
 

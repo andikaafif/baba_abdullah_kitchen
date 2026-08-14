@@ -52,7 +52,7 @@ function mapProductToMenuItem(p: PublicProduct): MenuItem {
     name: p.name,
     category: (p.category_name as MenuItem['category']) || 'Kukus',
     description: p.description || '',
-    variants: p.variants.map((v) => ({ id: v.id, label: v.label, pcs: v.pcs, price: Number(v.price) })),
+    variants: p.variants.map((v) => ({ id: v.id, label: v.label, pcs: v.pcs, price: Number(v.price), stock: v.stock ?? 0 })),
     image: resolveImage(p.photo_url),
   };
 }
