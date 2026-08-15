@@ -3,7 +3,7 @@ import {
   Box, Grid, Card, CardContent, Typography, Chip, CircularProgress,
 } from '@mui/material';
 import {
-  TrendingUp, ShoppingCart, Inventory, LocalOffer,
+  TrendingUp, ShoppingCart, Inventory,
   AccountBalance, MonetizationOn,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';

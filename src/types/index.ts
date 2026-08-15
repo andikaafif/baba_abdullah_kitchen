@@ -33,7 +33,7 @@ export type PaymentMethod = 'Cash' | 'Transfer' | 'QRIS';
 export interface CustomerInfo {
   name: string;
   phone: string;
-  address: string;
+  address?: string;
   notes?: string;
   deliveryMethod: DeliveryMethod;
   deliveryArea?: string;
