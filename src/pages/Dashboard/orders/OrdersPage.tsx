@@ -12,18 +12,16 @@ import { orderApi, type Order } from '../../../services/orderApi';
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending', color: 'default' as const },
-  { value: 'confirmed', label: 'Dikonfirmasi', color: 'info' as const },
   { value: 'preparing', label: 'Sedang Disiapkan', color: 'warning' as const },
-  { value: 'ready', label: 'Siap', color: 'success' as const },
-  { value: 'delivered', label: 'Dikirim/Diterima', color: 'success' as const },
+  { value: 'ready', label: 'Siap Dikirim', color: 'info' as const },
+  { value: 'delivered', label: 'Diterima', color: 'success' as const },
   { value: 'cancelled', label: 'Dibatalkan', color: 'error' as const },
 ];
 
 const STATUS_MESSAGES: Record<string, string> = {
-  confirmed: 'Halo {name}, pesanan Anda ({order}) telah dikonfirmasi. Kami sedang mempersiapkan pesanan Anda. Terima kasih! 🙏',
   preparing: 'Halo {name}, pesanan Anda ({order}) sedang dalam proses pembuatan. Mohon ditunggu ya! 🍳',
   ready: 'Halo {name}, pesanan Anda ({order}) sudah siap! Silakan diambil atau akan segera dikirim. 🎉',
-  delivered: 'Halo {name}, pesanan Anda ({order}) sudah dikirim/diterima. Selamat menikmati! Terima kasih sudah memesan di Dapoer Baba Abdullah 🥟',
+  delivered: 'Halo {name}, pesanan Anda ({order}) sudah diterima. Selamat menikmati! Terima kasih sudah memesan di Dapoer Baba Abdullah 🥟',
   cancelled: 'Halo {name}, mohon maaf pesanan Anda ({order}) terpaksa dibatalkan. Silakan hubungi kami untuk informasi lebih lanjut. 🙏',
 };
 

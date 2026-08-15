@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import {
   TrendingUp, ShoppingCart, Inventory, LocalOffer,
+  AccountBalance, MonetizationOn,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -11,6 +12,7 @@ import {
   ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 import { reportApi } from '../../services/reportApi';
+import { expenseApi } from '../../services/expenseApi';
 
 const KpiCard: React.FC<{
   title: string; value: string; subtitle: string;
@@ -44,6 +46,11 @@ const DashboardOverviewPage: React.FC = () => {
     queryFn: () => reportApi.sales('daily', monthStart, todayStr).then((r) => r.data),
   });
 
+  const { data: monthlyProfit } = useQuery({
+    queryKey: ['overview-monthly-expenses', monthStart, todayStr],
+    queryFn: () => expenseApi.list(monthStart, todayStr).then((r) => r.data),
+  });
+
   const { data: topVariants, isLoading: loadingTop } = useQuery({
     queryKey: ['overview-top-variants'],
     queryFn: () => reportApi.topVariants({ limit: 5 }).then((r) => r.data),
@@ -51,7 +58,12 @@ const DashboardOverviewPage: React.FC = () => {
 
   const totalRevenue = monthlySales?.reduce((s, d) => s + Number(d.total_revenue), 0) ?? 0;
   const totalOrders = monthlySales?.reduce((s, d) => s + Number(d.order_count), 0) ?? 0;
+  const totalExpenses = monthlyProfit?.reduce((s, e) => s + Number(e.expense_cost), 0) ?? 0;
+  const totalNetProfit = totalRevenue - totalExpenses;
   const todayData = monthlySales?.find((d) => d.period_label === todayStr);
+  const todayExpenses = monthlyProfit?.filter((e) => e.created_at.startsWith(todayStr)).reduce((s, e) => s + Number(e.expense_cost), 0) ?? 0;
+  const todayNetProfit = Number(todayData?.total_revenue ?? 0) - todayExpenses;
+  const todayItemsSold = Number(todayData?.total_items_sold ?? 0);
 
   return (
     <Box>
@@ -63,11 +75,20 @@ const DashboardOverviewPage: React.FC = () => {
       <Grid container spacing={2} mb={4}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
-            title="Pendapatan Bulan Ini"
+            title="Pendapatan Bulan Ini (Gross)"
             value={formatRp(totalRevenue)}
             subtitle="Total semua pesanan"
             icon={<TrendingUp />}
             color="#8B4513"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <KpiCard
+            title="Laba Bersih Bulan Ini (Net)"
+            value={formatRp(totalNetProfit)}
+            subtitle="Pendapatan dikurangi pengeluaran"
+            icon={<AccountBalance />}
+            color="#1976D2"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -81,19 +102,19 @@ const DashboardOverviewPage: React.FC = () => {
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
-            title="Pendapatan Hari Ini"
+            title="Penjualan Hari Ini"
             value={formatRp(Number(todayData?.total_revenue ?? 0))}
-            subtitle="Penjualan hari ini"
-            icon={<Inventory />}
+            subtitle={`${todayItemsSold} item terjual · ${todayData?.order_count ?? 0} pesanan`}
+            icon={<MonetizationOn />}
             color="#F6C453"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
-            title="Pesanan Hari Ini"
-            value={(todayData?.order_count ?? 0).toString()}
-            subtitle="Transaksi hari ini"
-            icon={<LocalOffer />}
+            title="Laba Bersih Hari Ini"
+            value={formatRp(todayNetProfit)}
+            subtitle="Pendapatan - pengeluaran hari ini"
+            icon={<Inventory />}
             color="#43A047"
           />
         </Grid>

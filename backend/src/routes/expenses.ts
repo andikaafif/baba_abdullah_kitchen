@@ -59,7 +59,8 @@ router.get('/summary', authMiddleware, async (req: Request, res: Response) => {
       SELECT
         ${label} AS period_label,
         COUNT(*) AS item_count,
-        SUM(expense_cost) AS total_expense
+        SUM(expense_cost) AS total_expense,
+        MAX(e.created_at) AS last_entry_at
       FROM expenses e
       WHERE 1=1 ${clause}
       GROUP BY ${groupBy}
