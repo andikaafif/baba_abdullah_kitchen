@@ -40,7 +40,7 @@ const DashboardOverviewPage: React.FC = () => {
   const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
   const { data: monthlySales, isLoading: loadingMonthly } = useQuery({
-    queryKey: ['overview-monthly'],
+    queryKey: ['overview-monthly', monthStart, todayStr],
     queryFn: () => reportApi.sales('daily', monthStart, todayStr).then((r) => r.data),
   });
 

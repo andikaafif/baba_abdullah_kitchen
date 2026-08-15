@@ -83,7 +83,7 @@ const ExpensesPage: React.FC = () => {
           {summary.slice(-5).map((s) => (
             <Card key={s.period_label} sx={{ minWidth: 150, flex: '1 1 150px' }}>
               <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <Typography variant="caption" color="text.secondary">{s.period_label}</Typography>
+                <Typography variant="caption" color="text.secondary">{(() => { const d = new Date(s.period_label); const p = (n: number) => String(n).padStart(2, '0'); return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; })()}</Typography>
                 <Typography variant="subtitle1" fontWeight={700}>{formatRp(s.total_expense)}</Typography>
                 <Typography variant="caption" color="text.secondary">{s.item_count} item</Typography>
               </CardContent>
@@ -113,7 +113,7 @@ const ExpensesPage: React.FC = () => {
                   <TableCell align="right">{e.quantity}</TableCell>
                   <TableCell align="right">{formatRp(e.original_price)}</TableCell>
                   <TableCell align="right">{formatRp(e.expense_cost)}</TableCell>
-                  <TableCell align="right">{new Date(e.created_at).toLocaleDateString('id-ID')}</TableCell>
+                  <TableCell align="right">{(() => { const d = new Date(e.created_at); const p = (n: number) => String(n).padStart(2, '0'); return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`; })()}</TableCell>
                   <TableCell align="center">
                     <IconButton size="small" color="error" onClick={() => deleteMutation.mutate(e.id)}>
                       <Delete fontSize="small" />
