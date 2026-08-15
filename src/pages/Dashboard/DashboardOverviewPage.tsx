@@ -12,6 +12,7 @@ import {
   ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 import { reportApi } from '../../services/reportApi';
+import { expenseApi } from '../../services/expenseApi';
 
 const KpiCard: React.FC<{
   title: string; value: string; subtitle: string;
@@ -46,8 +47,8 @@ const DashboardOverviewPage: React.FC = () => {
   });
 
   const { data: monthlyProfit } = useQuery({
-    queryKey: ['overview-monthly-profit', monthStart, todayStr],
-    queryFn: () => reportApi.profit('daily', monthStart, todayStr).then((r) => r.data),
+    queryKey: ['overview-monthly-expenses', monthStart, todayStr],
+    queryFn: () => expenseApi.list(monthStart, todayStr).then((r) => r.data),
   });
 
   const { data: topVariants, isLoading: loadingTop } = useQuery({
@@ -57,9 +58,11 @@ const DashboardOverviewPage: React.FC = () => {
 
   const totalRevenue = monthlySales?.reduce((s, d) => s + Number(d.total_revenue), 0) ?? 0;
   const totalOrders = monthlySales?.reduce((s, d) => s + Number(d.order_count), 0) ?? 0;
-  const totalProfit = monthlyProfit?.reduce((s, d) => s + Number(d.total_profit ?? 0), 0) ?? 0;
+  const totalExpenses = monthlyProfit?.reduce((s, e) => s + Number(e.expense_cost), 0) ?? 0;
+  const totalNetProfit = totalRevenue - totalExpenses;
   const todayData = monthlySales?.find((d) => d.period_label === todayStr);
-  const todayProfitData = monthlyProfit?.find((d) => d.period_label === todayStr);
+  const todayExpenses = monthlyProfit?.filter((e) => e.created_at.startsWith(todayStr)).reduce((s, e) => s + Number(e.expense_cost), 0) ?? 0;
+  const todayNetProfit = Number(todayData?.total_revenue ?? 0) - todayExpenses;
   const todayItemsSold = Number(todayData?.total_items_sold ?? 0);
 
   return (
@@ -82,8 +85,8 @@ const DashboardOverviewPage: React.FC = () => {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
             title="Laba Bersih Bulan Ini (Net)"
-            value={formatRp(totalProfit)}
-            subtitle="Setelah dikurangi HPP"
+            value={formatRp(totalNetProfit)}
+            subtitle="Pendapatan dikurangi pengeluaran"
             icon={<AccountBalance />}
             color="#1976D2"
           />
@@ -109,8 +112,8 @@ const DashboardOverviewPage: React.FC = () => {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
             title="Laba Bersih Hari Ini"
-            value={formatRp(Number(todayProfitData?.total_profit ?? 0))}
-            subtitle="Net profit hari ini"
+            value={formatRp(todayNetProfit)}
+            subtitle="Pendapatan - pengeluaran hari ini"
             icon={<Inventory />}
             color="#43A047"
           />

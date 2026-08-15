@@ -13,6 +13,7 @@ import {
   Legend, ResponsiveContainer,
 } from 'recharts';
 import { reportApi, type Period } from '../../../services/reportApi';
+import { expenseApi } from '../../../services/expenseApi';
 
 const BRAND_COLORS = ['#8B4513', '#D4A373', '#F6C453', '#43A047', '#1976D2', '#E53935'];
 
@@ -58,12 +59,18 @@ const ReportsPage: React.FC = () => {
     queryFn: () => reportApi.salesTable(from, to).then((r) => r.data as any[]),
   });
 
+  const { data: expensesData } = useQuery({
+    queryKey: ['report-expenses', from, to],
+    queryFn: () => expenseApi.list(from, to).then((r) => r.data),
+  });
+
   const handleExport = () => reportApi.exportExcel(from, to);
 
   const periodLabel = period === 'daily' ? '30 Hari' : period === 'weekly' ? '12 Minggu' : '12 Bulan';
 
-  const totalGrossRevenue = profitData?.reduce((s, d) => s + Number(d.total_revenue), 0) ?? 0;
-  const totalNetProfit = profitData?.reduce((s, d) => s + Number(d.total_profit ?? 0), 0) ?? 0;
+  const totalGrossRevenue = salesData?.reduce((s, d) => s + Number(d.total_revenue), 0) ?? 0;
+  const totalExpenses = expensesData?.reduce((s, e) => s + Number(e.expense_cost), 0) ?? 0;
+  const totalNetProfit = totalGrossRevenue - totalExpenses;
 
   return (
     <Box>
