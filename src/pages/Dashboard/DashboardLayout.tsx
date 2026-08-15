@@ -112,20 +112,20 @@ const DashboardLayout: React.FC = () => {
 
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: collapsed ? 1 : 2 }} />
 
-      {/* Collapse toggle (desktop only) */}
-      {!isMobile && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
-          <IconButton size="small" onClick={() => setCollapsed(!collapsed)} sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: 'white' } }}>
-            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </Box>
-      )}
-
       {/* User info + logout */}
-      <Box sx={{ p: collapsed ? 1.5 : 2, display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-        <Avatar sx={{ width: 36, height: 36, bgcolor: '#D4A373', color: '#2D1A0E', fontSize: 14, fontWeight: 700 }}>
-          {admin.username[0].toUpperCase()}
-        </Avatar>
+      <Box sx={{
+        p: collapsed ? 1.5 : 2,
+        display: 'flex',
+        flexDirection: collapsed ? 'column' : 'row',
+        alignItems: 'center',
+        gap: collapsed ? 1 : 1.5,
+        justifyContent: collapsed ? 'center' : 'flex-start',
+      }}>
+        <Tooltip title={collapsed ? admin.username : ''} placement="right">
+          <Avatar sx={{ width: 36, height: 36, bgcolor: '#D4A373', color: '#2D1A0E', fontSize: 14, fontWeight: 700 }}>
+            {admin.username[0].toUpperCase()}
+          </Avatar>
+        </Tooltip>
         {!collapsed && (
           <Box flex={1} minWidth={0}>
             <Typography variant="body2" fontWeight={600} color="white" noWrap>{admin.username}</Typography>
@@ -164,6 +164,29 @@ const DashboardLayout: React.FC = () => {
       >
         {drawerContent}
       </Drawer>
+
+      {/* Floating collapse toggle (desktop only) */}
+      {!isMobile && (
+        <IconButton
+          onClick={() => setCollapsed(!collapsed)}
+          sx={{
+            position: 'fixed',
+            top: '50%',
+            left: drawerWidth - 14,
+            transform: 'translateY(-50%)',
+            zIndex: 1201,
+            width: 28,
+            height: 28,
+            bgcolor: '#8B4513',
+            color: 'white',
+            boxShadow: 2,
+            transition: 'left 0.2s ease',
+            '&:hover': { bgcolor: '#6D3510' },
+          }}
+        >
+          {collapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+        </IconButton>
+      )}
 
       {/* Main content */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
