@@ -62,6 +62,9 @@ const ReportsPage: React.FC = () => {
 
   const periodLabel = period === 'daily' ? '30 Hari' : period === 'weekly' ? '12 Minggu' : '12 Bulan';
 
+  const totalGrossRevenue = profitData?.reduce((s, d) => s + Number(d.total_revenue), 0) ?? 0;
+  const totalNetProfit = profitData?.reduce((s, d) => s + Number(d.total_profit ?? 0), 0) ?? 0;
+
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -86,6 +89,22 @@ const ReportsPage: React.FC = () => {
           <ToggleButton value="weekly">Mingguan</ToggleButton>
           <ToggleButton value="monthly">Bulanan</ToggleButton>
         </ToggleButtonGroup>
+      </Box>
+
+      {/* Revenue & Profit Summary */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+        <Card sx={{ flex: '1 1 200px' }}>
+          <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+            <Typography variant="caption" color="text.secondary">Pendapatan Kotor (Gross Revenue) – {periodLabel}</Typography>
+            <Typography variant="h6" fontWeight={700} color="#8B4513">{formatRp(totalGrossRevenue)}</Typography>
+          </CardContent>
+        </Card>
+        <Card sx={{ flex: '1 1 200px' }}>
+          <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+            <Typography variant="caption" color="text.secondary">Laba Bersih (Net Profit) – {periodLabel}</Typography>
+            <Typography variant="h6" fontWeight={700} color="#43A047">{formatRp(totalNetProfit)}</Typography>
+          </CardContent>
+        </Card>
       </Box>
 
       {/* Tabs */}

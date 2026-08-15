@@ -8,6 +8,7 @@ export interface SalesPoint {
   order_count: number;
   total_revenue: number;
   total_profit?: number;
+  total_items_sold?: number;
 }
 
 export interface TopVariant {

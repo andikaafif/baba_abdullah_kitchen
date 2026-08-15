@@ -36,7 +36,7 @@ const schema = z
     phone: z
       .string()
       .regex(/^(\+62|62|0)[0-9]{8,12}$/, 'Format nomor HP tidak valid (contoh: 08123456789)'),
-    address: z.string().min(5, 'Alamat minimal 5 karakter'),
+    address: z.string().optional(),
     notes: z.string().optional(),
     deliveryMethod: z.enum(['Pickup', 'Delivery']),
     deliveryArea: z.string().optional(),
@@ -48,6 +48,13 @@ const schema = z
       return true;
     },
     { message: 'Pilih area pengiriman', path: ['deliveryArea'] }
+  )
+  .refine(
+    (data) => {
+      if (data.deliveryMethod === 'Delivery') return !!data.address && data.address.length >= 5;
+      return true;
+    },
+    { message: 'Alamat minimal 5 karakter', path: ['address'] }
   );
 
 type FormData = z.infer<typeof schema>;
@@ -99,73 +106,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues, on
       onSubmit={handleSubmit((data) => onSubmit(data))}
       sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}
     >
-      <Controller
-        name="name"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Nama Lengkap"
-            error={!!errors.name}
-            helperText={errors.name?.message}
-            fullWidth
-            required
-            slotProps={{ htmlInput: { 'aria-label': 'Nama lengkap' } }}
-          />
-        )}
-      />
-
-      <Controller
-        name="phone"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Nomor HP"
-            error={!!errors.phone}
-            helperText={errors.phone?.message || 'Contoh: 08123456789'}
-            fullWidth
-            required
-            type="tel"
-            slotProps={{ htmlInput: { 'aria-label': 'Nomor HP' } }}
-          />
-        )}
-      />
-
-      <Controller
-        name="address"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Alamat"
-            error={!!errors.address}
-            helperText={errors.address?.message}
-            fullWidth
-            required
-            multiline
-            rows={3}
-            slotProps={{ htmlInput: { 'aria-label': 'Alamat' } }}
-          />
-        )}
-      />
-
-      <Controller
-        name="notes"
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="Catatan (opsional)"
-            fullWidth
-            multiline
-            rows={2}
-            placeholder="Contoh: tidak pedas, saus terpisah..."
-            slotProps={{ htmlInput: { 'aria-label': 'Catatan pesanan' } }}
-          />
-        )}
-      />
-
+      {/* Shipping method first */}
       <Box>
         <FormControl component="fieldset" required>
           <FormLabel component="legend">
@@ -203,7 +144,8 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues, on
         </Alert>
       )}
 
-      {deliveryMethod === 'Delivery' && (        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      {deliveryMethod === 'Delivery' && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Alert severity="info" sx={{ fontSize: '0.8rem' }}>
             Pengiriman tersedia untuk area yang terdaftar. Biaya kirim sesuai zona pengiriman.
           </Alert>
@@ -235,6 +177,75 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, defaultValues, on
           )}
         </Box>
       )}
+
+      <Controller
+        name="name"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Nama Lengkap"
+            error={!!errors.name}
+            helperText={errors.name?.message}
+            fullWidth
+            required
+            slotProps={{ htmlInput: { 'aria-label': 'Nama lengkap' } }}
+          />
+        )}
+      />
+
+      <Controller
+        name="phone"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Nomor HP"
+            error={!!errors.phone}
+            helperText={errors.phone?.message || 'Contoh: 08123456789'}
+            fullWidth
+            required
+            type="tel"
+            slotProps={{ htmlInput: { 'aria-label': 'Nomor HP' } }}
+          />
+        )}
+      />
+
+      {deliveryMethod === 'Delivery' && (
+        <Controller
+          name="address"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Alamat"
+              error={!!errors.address}
+              helperText={errors.address?.message}
+              fullWidth
+              required
+              multiline
+              rows={3}
+              slotProps={{ htmlInput: { 'aria-label': 'Alamat' } }}
+            />
+          )}
+        />
+      )}
+
+      <Controller
+        name="notes"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Catatan (opsional)"
+            fullWidth
+            multiline
+            rows={2}
+            placeholder="Contoh: tidak pedas, saus terpisah..."
+            slotProps={{ htmlInput: { 'aria-label': 'Catatan pesanan' } }}
+          />
+        )}
+      />
 
       <Box>
         <FormControl component="fieldset" required>

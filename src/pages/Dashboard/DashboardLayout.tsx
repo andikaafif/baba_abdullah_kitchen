@@ -19,10 +19,13 @@ import {
   LocalShipping as ShippingIcon,
   Construction as MaintenanceIcon,
   ShoppingBag as OrdersIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { useAuthStore } from '../../store/authStore';
 
 const DRAWER_WIDTH = 240;
+const DRAWER_COLLAPSED_WIDTH = 68;
 
 const NAV_ITEMS = [
   { label: 'Overview', path: '/dashboard', icon: <DashboardIcon /> },
@@ -48,6 +51,9 @@ const DashboardLayout: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  const drawerWidth = collapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH;
 
   if (!admin) return <Navigate to="/dashboard/login" replace />;
 
@@ -62,53 +68,70 @@ const DashboardLayout: React.FC = () => {
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: SIDEBAR_BG }}>
       {/* Logo */}
-      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ p: collapsed ? 1.5 : 3, display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: collapsed ? 'center' : 'flex-start' }}>
         <Avatar sx={{ bgcolor: '#8B4513', width: 40, height: 40 }}>
           <RestaurantIcon fontSize="small" />
         </Avatar>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700} color="white" lineHeight={1.2}>
-            Baba Abdullah
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-            Kitchen Admin
-          </Typography>
-        </Box>
+        {!collapsed && (
+          <Box>
+            <Typography variant="subtitle1" fontWeight={700} color="white" lineHeight={1.2}>
+              Baba Abdullah
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+              Kitchen Admin
+            </Typography>
+          </Box>
+        )}
       </Box>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: 2 }} />
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: collapsed ? 1 : 2 }} />
 
       <List sx={{ flex: 1, pt: 1 }}>
         {NAV_ITEMS.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              onClick={() => { navigate(item.path); setMobileOpen(false); }}
-              sx={{
-                mx: 1,
-                borderRadius: 2,
-                color: isActive(item.path) ? 'white' : 'rgba(255,255,255,0.65)',
-                bgcolor: isActive(item.path) ? SIDEBAR_ACTIVE : 'transparent',
-                '&:hover': { bgcolor: isActive(item.path) ? SIDEBAR_ACTIVE : 'rgba(255,255,255,0.08)' },
-              }}
-            >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: isActive(item.path) ? 700 : 400 }} />
-            </ListItemButton>
+            <Tooltip title={collapsed ? item.label : ''} placement="right">
+              <ListItemButton
+                onClick={() => { navigate(item.path); setMobileOpen(false); }}
+                sx={{
+                  mx: 1,
+                  borderRadius: 2,
+                  justifyContent: collapsed ? 'center' : 'flex-start',
+                  px: collapsed ? 1.5 : 2,
+                  color: isActive(item.path) ? 'white' : 'rgba(255,255,255,0.65)',
+                  bgcolor: isActive(item.path) ? SIDEBAR_ACTIVE : 'transparent',
+                  '&:hover': { bgcolor: isActive(item.path) ? SIDEBAR_ACTIVE : 'rgba(255,255,255,0.08)' },
+                }}
+              >
+                <ListItemIcon sx={{ color: 'inherit', minWidth: collapsed ? 0 : 40 }}>{item.icon}</ListItemIcon>
+                {!collapsed && <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: isActive(item.path) ? 700 : 400 }} />}
+              </ListItemButton>
+            </Tooltip>
           </ListItem>
         ))}
       </List>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: 2 }} />
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', mx: collapsed ? 1 : 2 }} />
+
+      {/* Collapse toggle (desktop only) */}
+      {!isMobile && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+          <IconButton size="small" onClick={() => setCollapsed(!collapsed)} sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: 'white' } }}>
+            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        </Box>
+      )}
 
       {/* User info + logout */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ p: collapsed ? 1.5 : 2, display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: collapsed ? 'center' : 'flex-start' }}>
         <Avatar sx={{ width: 36, height: 36, bgcolor: '#D4A373', color: '#2D1A0E', fontSize: 14, fontWeight: 700 }}>
           {admin.username[0].toUpperCase()}
         </Avatar>
-        <Box flex={1} minWidth={0}>
-          <Typography variant="body2" fontWeight={600} color="white" noWrap>{admin.username}</Typography>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>Administrator</Typography>
-        </Box>
+        {!collapsed && (
+          <Box flex={1} minWidth={0}>
+            <Typography variant="body2" fontWeight={600} color="white" noWrap>{admin.username}</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>Administrator</Typography>
+          </Box>
+        )}
         <Tooltip title="Logout">
           <IconButton size="small" onClick={handleLogout} sx={{ color: 'rgba(255,255,255,0.6)', '&:hover': { color: 'white' } }}>
             <LogoutIcon fontSize="small" />
@@ -126,9 +149,16 @@ const DashboardLayout: React.FC = () => {
         open={isMobile ? mobileOpen : true}
         onClose={() => setMobileOpen(false)}
         sx={{
-          width: DRAWER_WIDTH,
+          width: isMobile ? DRAWER_WIDTH : drawerWidth,
           flexShrink: 0,
-          '& .MuiDrawer-paper': { width: DRAWER_WIDTH, boxSizing: 'border-box', border: 'none' },
+          transition: 'width 0.2s ease',
+          '& .MuiDrawer-paper': {
+            width: isMobile ? DRAWER_WIDTH : drawerWidth,
+            boxSizing: 'border-box',
+            border: 'none',
+            transition: 'width 0.2s ease',
+            overflowX: 'hidden',
+          },
         }}
         ModalProps={{ keepMounted: true }}
       >

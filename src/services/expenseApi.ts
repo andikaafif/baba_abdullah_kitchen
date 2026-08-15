@@ -13,6 +13,7 @@ export interface ExpenseSummary {
   period_label: string;
   item_count: number;
   total_expense: number;
+  last_entry_at?: string;
 }
 
 export type ExpensePeriod = 'daily' | 'weekly' | 'monthly';

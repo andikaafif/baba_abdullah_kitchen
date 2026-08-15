@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import {
   TrendingUp, ShoppingCart, Inventory, LocalOffer,
+  AccountBalance, MonetizationOn,
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -44,6 +45,11 @@ const DashboardOverviewPage: React.FC = () => {
     queryFn: () => reportApi.sales('daily', monthStart, todayStr).then((r) => r.data),
   });
 
+  const { data: monthlyProfit } = useQuery({
+    queryKey: ['overview-monthly-profit', monthStart, todayStr],
+    queryFn: () => reportApi.profit('daily', monthStart, todayStr).then((r) => r.data),
+  });
+
   const { data: topVariants, isLoading: loadingTop } = useQuery({
     queryKey: ['overview-top-variants'],
     queryFn: () => reportApi.topVariants({ limit: 5 }).then((r) => r.data),
@@ -51,7 +57,10 @@ const DashboardOverviewPage: React.FC = () => {
 
   const totalRevenue = monthlySales?.reduce((s, d) => s + Number(d.total_revenue), 0) ?? 0;
   const totalOrders = monthlySales?.reduce((s, d) => s + Number(d.order_count), 0) ?? 0;
+  const totalProfit = monthlyProfit?.reduce((s, d) => s + Number(d.total_profit ?? 0), 0) ?? 0;
   const todayData = monthlySales?.find((d) => d.period_label === todayStr);
+  const todayProfitData = monthlyProfit?.find((d) => d.period_label === todayStr);
+  const todayItemsSold = Number(todayData?.total_items_sold ?? 0);
 
   return (
     <Box>
@@ -63,11 +72,20 @@ const DashboardOverviewPage: React.FC = () => {
       <Grid container spacing={2} mb={4}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
-            title="Pendapatan Bulan Ini"
+            title="Pendapatan Bulan Ini (Gross)"
             value={formatRp(totalRevenue)}
             subtitle="Total semua pesanan"
             icon={<TrendingUp />}
             color="#8B4513"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <KpiCard
+            title="Laba Bersih Bulan Ini (Net)"
+            value={formatRp(totalProfit)}
+            subtitle="Setelah dikurangi HPP"
+            icon={<AccountBalance />}
+            color="#1976D2"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -81,19 +99,19 @@ const DashboardOverviewPage: React.FC = () => {
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
-            title="Pendapatan Hari Ini"
+            title="Penjualan Hari Ini"
             value={formatRp(Number(todayData?.total_revenue ?? 0))}
-            subtitle="Penjualan hari ini"
-            icon={<Inventory />}
+            subtitle={`${todayItemsSold} item terjual · ${todayData?.order_count ?? 0} pesanan`}
+            icon={<MonetizationOn />}
             color="#F6C453"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
-            title="Pesanan Hari Ini"
-            value={(todayData?.order_count ?? 0).toString()}
-            subtitle="Transaksi hari ini"
-            icon={<LocalOffer />}
+            title="Laba Bersih Hari Ini"
+            value={formatRp(Number(todayProfitData?.total_profit ?? 0))}
+            subtitle="Net profit hari ini"
+            icon={<Inventory />}
             color="#43A047"
           />
         </Grid>

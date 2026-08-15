@@ -58,17 +58,35 @@ router.get('/sales', authMiddleware, async (req: Request, res: Response) => {
 
   const sql = `
     SELECT
-      ${label} AS period_label,
-      COUNT(*) AS order_count,
-      SUM(o.total_price) AS total_revenue
-    FROM orders o
-    WHERE o.status NOT IN ('cancelled')
-    ${clause}
-    GROUP BY ${groupBy}
-    ORDER BY MIN(o.created_at) ASC
+      sub.period_label,
+      sub.order_count,
+      sub.total_revenue,
+      COALESCE(items.total_items_sold, 0) AS total_items_sold
+    FROM (
+      SELECT
+        ${label} AS period_label,
+        ${groupBy} AS grp,
+        COUNT(*) AS order_count,
+        SUM(o.total_price) AS total_revenue
+      FROM orders o
+      WHERE o.status NOT IN ('cancelled')
+      ${clause}
+      GROUP BY ${groupBy}
+    ) sub
+    LEFT JOIN (
+      SELECT
+        ${groupBy} AS grp,
+        SUM(oi.quantity) AS total_items_sold
+      FROM orders o
+      JOIN order_items oi ON oi.order_id = o.id
+      WHERE o.status NOT IN ('cancelled')
+      ${clause}
+      GROUP BY ${groupBy}
+    ) items ON items.grp = sub.grp
+    ORDER BY sub.period_label ASC
   `;
-  const [rows] = await pool.query<any[]>(sql, params);
-  res.json(rows.map((r) => ({ ...r, order_count: Number(r.order_count), total_revenue: Number(r.total_revenue) })));
+  const [rows] = await pool.query<any[]>(sql, [...params, ...params]);
+  res.json(rows.map((r) => ({ ...r, order_count: Number(r.order_count), total_revenue: Number(r.total_revenue), total_items_sold: Number(r.total_items_sold) })));
 });
 
 /**
