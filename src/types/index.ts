@@ -6,6 +6,8 @@ export interface MenuVariant {
   originalPrice?: number;
   promoName?: string;
   stock?: number;
+  oosMessage?: string;
+  restockAt?: string;
 }
 
 export type MenuCategory = 'Kukus' | 'Mentai' | 'Cheese' | 'Frozen' | 'Birthday' | 'Lain - Lain' | 'Lain Lain';

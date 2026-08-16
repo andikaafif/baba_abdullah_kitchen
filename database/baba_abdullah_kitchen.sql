@@ -594,4 +594,23 @@ INSERT INTO `inventory_logs` (`product_variant_id`, `change_qty`, `reason`, `cre
   (13, -4,  'Penjualan harian',          '2026-08-12 17:00:00'),
   (15, -6,  'Penjualan harian',          '2026-08-13 17:00:00');
 
+-- ------------------------------------------------------------
+-- Table: out_of_stock_settings
+-- Custom messages & restock dates for out-of-stock variants
+-- ------------------------------------------------------------
+CREATE TABLE `out_of_stock_settings` (
+  `id`          INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+  `variant_id`  INT UNSIGNED     NOT NULL,
+  `product_id`  INT UNSIGNED     NOT NULL,
+  `message`     VARCHAR(500)     DEFAULT NULL,
+  `restock_at`  DATETIME         DEFAULT NULL,
+  `created_at`  TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`  TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_variant` (`variant_id`),
+  KEY `idx_product` (`product_id`),
+  CONSTRAINT `fk_oos_variant` FOREIGN KEY (`variant_id`) REFERENCES `product_variants`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_oos_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;

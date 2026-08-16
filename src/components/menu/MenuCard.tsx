@@ -26,6 +26,7 @@ import { formatRupiah } from '../../utils/format';
 
 interface MenuCardProps {
   item: MenuItem;
+  storeClosed?: boolean;
 }
 
 const categoryColors: Record<string, string> = {
@@ -35,7 +36,7 @@ const categoryColors: Record<string, string> = {
   Frozen: '#2196F3',
 };
 
-const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
+const MenuCard: React.FC<MenuCardProps> = ({ item, storeClosed }) => {
   const addItem = useCartStore((s) => s.addItem);
   const [selectedVariant, setSelectedVariant] = useState<MenuVariant>(
     item.variants.find((v) => (v.stock ?? 0) > 0) ?? item.variants[0]
@@ -44,6 +45,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const isOutOfStock = (selectedVariant.stock ?? 0) <= 0;
+  const isDisabled = isOutOfStock || !!storeClosed;
   const hasAnyPromo = item.variants.some((v) => !!v.promoName);
 
   const handleAddToCart = () => {
@@ -184,11 +186,26 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
             fullWidth
             startIcon={<AddShoppingCartIcon />}
             onClick={handleAddToCart}
-            disabled={isOutOfStock}
+            disabled={isDisabled}
             aria-label={`Tambah ${item.name} ke keranjang`}
           >
-            {isOutOfStock ? 'Stok Habis' : 'Tambah ke Keranjang'}
+            {storeClosed ? 'Toko Tutup' : isOutOfStock ? 'Stok Habis' : 'Tambah ke Keranjang'}
           </Button>
+
+          {isOutOfStock && (selectedVariant.oosMessage || selectedVariant.restockAt) && (
+            <Box sx={{ width: '100%', mt: 0.5, textAlign: 'center' }}>
+              {selectedVariant.oosMessage && (
+                <Typography variant="caption" color="error" display="block">
+                  {selectedVariant.oosMessage}
+                </Typography>
+              )}
+              {selectedVariant.restockAt && (
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Estimasi restock: {new Date(selectedVariant.restockAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                </Typography>
+              )}
+            </Box>
+          )}
         </CardActions>
       </Card>
 

@@ -80,16 +80,39 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [storeClosed, setStoreClosed] = useState(false);
 
   useEffect(() => {
-    Promise.all([
+    const loadProducts = Promise.all([
       storefrontApi.getProducts(),
       storefrontApi.getActivePromotions(),
-    ])
-      .then(([res, promosRes]) => {
-        const products = res.data.slice(0, 4);
+    ]);
+    const loadClosure = storefrontApi.getStoreClosure().catch(() => ({ data: { enabled: false, message: '', reopen_at: null } }));
+    const loadOos = storefrontApi.getOutOfStockSettings().catch(() => ({ data: [] as Array<{ variant_id: number; product_id: number; message: string | null; restock_at: string | null }> }));
+
+    Promise.all([loadProducts, loadClosure, loadOos])
+      .then(([[res, promosRes], closureRes, oosRes]) => {
+        setStoreClosed(closureRes.data.enabled);
+
+        const oosMap = new Map<number, { message: string | null; restock_at: string | null }>();
+        for (const oos of oosRes.data) {
+          oosMap.set(oos.variant_id, { message: oos.message, restock_at: oos.restock_at });
+        }
+
+        const isLain = (name: string) => name === 'Lain - Lain' || name === 'Lain Lain';
+        const products = res.data
+          .filter((p) => !isLain(p.category_name))
+          .slice(0, 4);
         const items = products.map(mapProductToMenuItem);
-        setFeaturedItems(applyPromotions(items, promosRes.data));
+        const itemsWithOos = items.map((item) => ({
+          ...item,
+          variants: item.variants.map((v) => {
+            const oos = v.id ? oosMap.get(v.id) : undefined;
+            if (!oos) return v;
+            return { ...v, oosMessage: oos.message ?? undefined, restockAt: oos.restock_at ?? undefined };
+          }),
+        }));
+        setFeaturedItems(applyPromotions(itemsWithOos, promosRes.data));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -257,7 +280,7 @@ const HomePage: React.FC = () => {
               </Box>
             ) : featuredItems.map((item) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item.id}>
-                <MenuCard item={item} />
+                <MenuCard item={item} storeClosed={storeClosed} />
               </Grid>
             ))}
           </Grid>

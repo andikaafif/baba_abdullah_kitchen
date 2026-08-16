@@ -4,9 +4,9 @@ import {
   Box, Typography, Card, CardContent, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, TextField, Button,
   IconButton, Alert, CircularProgress, Chip, InputAdornment, TablePagination,
-  Collapse,
+  Collapse, Checkbox,
 } from '@mui/material';
-import { ArrowBack, Save, Search, AddBox, Close, LocalShipping } from '@mui/icons-material';
+import { ArrowBack, Save, Search, AddBox, Close, LocalShipping, RemoveShoppingCart } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productApi } from '../../../services/productApi';
 
@@ -358,6 +358,154 @@ const InventoryPage: React.FC = () => {
           rowsPerPageOptions={[15]}
         />
       </TableContainer>
+
+      {/* ─── Out-of-Stock Management Section ─── */}
+      <OutOfStockSection products={products} isLoading={isLoading} />
+    </Box>
+  );
+};
+
+// ─── Bulk Set Out-of-Stock Section ───
+interface OosSectionProps {
+  products: any[] | undefined;
+  isLoading: boolean;
+}
+
+const OutOfStockSection: React.FC<OosSectionProps> = ({ products, isLoading: productsLoading }) => {
+  const queryClient = useQueryClient();
+  const [selectedVariants, setSelectedVariants] = useState<Set<number>>(new Set());
+  const [success, setSuccess] = useState(false);
+
+  const bulkSetZeroMutation = useMutation({
+    mutationFn: async (variants: Array<{ productId: number; variantId: number; currentStock: number }>) => {
+      // Group by product for batch API calls
+      const grouped: Record<number, Array<{ variant_id: number; stock: number; change_qty: number; reason: string }>> = {};
+      for (const v of variants) {
+        if (!grouped[v.productId]) grouped[v.productId] = [];
+        grouped[v.productId].push({
+          variant_id: v.variantId,
+          stock: 0,
+          change_qty: -(v.currentStock),
+          reason: 'Set habis (bulk)',
+        });
+      }
+      for (const [productId, items] of Object.entries(grouped)) {
+        await productApi.updateInventory(Number(productId), items);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products-inventory'] });
+      setSelectedVariants(new Set());
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    },
+  });
+
+  // All variants that still have stock > 0
+  const availableVariants = products?.flatMap((p) =>
+    (p.variants ?? [])
+      .filter((v: any) => v.id != null && (v.stock ?? 0) > 0)
+      .map((v: any) => ({ productId: p.id, productName: p.name, variantId: v.id!, variantLabel: v.label, pcs: v.pcs, stock: v.stock ?? 0 }))
+  ) ?? [];
+
+  const toggleVariant = (variantId: number) => {
+    setSelectedVariants((prev) => {
+      const next = new Set(prev);
+      if (next.has(variantId)) next.delete(variantId);
+      else next.add(variantId);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selectedVariants.size === availableVariants.length) setSelectedVariants(new Set());
+    else setSelectedVariants(new Set(availableVariants.map((v) => v.variantId)));
+  };
+
+  const handleBulkSetZero = () => {
+    const variants = availableVariants
+      .filter((v) => selectedVariants.has(v.variantId))
+      .map((v) => ({ productId: v.productId, variantId: v.variantId, currentStock: v.stock }));
+    bulkSetZeroMutation.mutate(variants);
+  };
+
+  if (productsLoading) return null;
+
+  return (
+    <Box sx={{ mt: 4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <RemoveShoppingCart color="error" />
+        <Box flex={1}>
+          <Typography variant="h6" fontWeight={700}>Set Produk Habis</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Pilih varian lalu klik "Set Habis" untuk mengubah stok menjadi 0 — produk tidak bisa dipesan di PWA
+          </Typography>
+        </Box>
+        {selectedVariants.size > 0 && (
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<RemoveShoppingCart />}
+            onClick={handleBulkSetZero}
+            disabled={bulkSetZeroMutation.isPending}
+            sx={{ fontWeight: 700 }}
+          >
+            Set Habis ({selectedVariants.size})
+          </Button>
+        )}
+      </Box>
+
+      {success && <Alert severity="success" sx={{ mb: 2 }}>Stok berhasil diubah menjadi 0!</Alert>}
+
+      {availableVariants.length === 0 ? (
+        <Alert severity="info" sx={{ maxWidth: 600 }}>
+          Semua varian sudah habis (stok 0).
+        </Alert>
+      ) : (
+        <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#FFEBEE' }}>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedVariants.size === availableVariants.length && availableVariants.length > 0}
+                    indeterminate={selectedVariants.size > 0 && selectedVariants.size < availableVariants.length}
+                    onChange={toggleAll}
+                  />
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Produk</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Varian</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Pcs</TableCell>
+                <TableCell sx={{ fontWeight: 700 }} align="center">Stok Saat Ini</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {availableVariants.map((v) => (
+                <TableRow
+                  key={v.variantId}
+                  hover
+                  onClick={() => toggleVariant(v.variantId)}
+                  sx={{ cursor: 'pointer', ...(selectedVariants.has(v.variantId) && { bgcolor: '#FFEBEE !important' }) }}
+                >
+                  <TableCell padding="checkbox">
+                    <Checkbox checked={selectedVariants.has(v.variantId)} />
+                  </TableCell>
+                  <TableCell>{v.productName}</TableCell>
+                  <TableCell>{v.variantLabel}</TableCell>
+                  <TableCell>{v.pcs}</TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={v.stock}
+                      size="small"
+                      color={v.stock < 10 ? 'warning' : 'success'}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   );
 };

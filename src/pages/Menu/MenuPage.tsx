@@ -9,9 +9,15 @@ import {
   Fab,
   Badge,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import type { MenuItem } from '../../types';
 import MenuCard from '../../components/menu/MenuCard';
 import MenuCardSkeleton from '../../components/menu/MenuCardSkeleton';
@@ -61,15 +67,37 @@ const MenuPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<string[]>(['All']);
+  const [storeClosed, setStoreClosed] = useState<{ enabled: boolean; message: string; reopen_at: string | null } | null>(null);
 
   useEffect(() => {
-    Promise.all([
+    const loadProducts = Promise.all([
       storefrontApi.getProducts(),
       storefrontApi.getCategories(),
       storefrontApi.getActivePromotions(),
-    ]).then(([productsRes, categoriesRes, promosRes]) => {
+    ]);
+    const loadClosure = storefrontApi.getStoreClosure().catch(() => ({ data: { enabled: false, message: '', reopen_at: null } }));
+    const loadOos = storefrontApi.getOutOfStockSettings().catch(() => ({ data: [] as Array<{ variant_id: number; product_id: number; message: string | null; restock_at: string | null }> }));
+
+    Promise.all([loadProducts, loadClosure, loadOos]).then(([[productsRes, categoriesRes, promosRes], closureRes, oosRes]) => {
+      setStoreClosed(closureRes.data);
+
+      // Build OOS lookup by variant_id
+      const oosMap = new Map<number, { message: string | null; restock_at: string | null }>();
+      for (const oos of oosRes.data) {
+        oosMap.set(oos.variant_id, { message: oos.message, restock_at: oos.restock_at });
+      }
+
       const items = productsRes.data.map(mapProductToMenuItem);
-      setMenuItems(applyPromotions(items, promosRes.data));
+      // Apply OOS messages to variants
+      const itemsWithOos = items.map((item) => ({
+        ...item,
+        variants: item.variants.map((v) => {
+          const oos = v.id ? oosMap.get(v.id) : undefined;
+          if (!oos) return v;
+          return { ...v, oosMessage: oos.message ?? undefined, restockAt: oos.restock_at ?? undefined };
+        }),
+      }));
+      setMenuItems(applyPromotions(itemsWithOos, promosRes.data));
       const catNames = categoriesRes.data.map((c) => c.name);
       const isLainCategory = (n: string) => n === 'Lain - Lain' || n === 'Lain Lain';
       const sorted = catNames.filter((n) => !isLainCategory(n));
@@ -109,6 +137,30 @@ const MenuPage: React.FC = () => {
           Pilih dim sum favoritmu 🥟
         </Typography>
       </Box>
+
+      {/* Store Closure Dialog */}
+      <Dialog
+        open={storeClosed?.enabled ?? false}
+        PaperProps={{ sx: { borderRadius: 4, p: 1, textAlign: 'center', maxWidth: 400 } }}
+      >
+        <DialogTitle sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, pb: 0 }}>
+          <StorefrontIcon sx={{ fontSize: 48, color: 'warning.main' }} />
+          <Typography variant="h6" fontWeight={700}>Toko Sedang Tutup</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            {storeClosed?.message || 'Toko sedang tutup sementara'}
+          </Typography>
+          {storeClosed?.reopen_at && (
+            <Typography variant="body2" color="text.secondary">
+              Buka kembali: {new Date(storeClosed.reopen_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+          <Button variant="outlined" href="/">Kembali ke Beranda</Button>
+        </DialogActions>
+      </Dialog>
 
       <Container maxWidth="lg" sx={{ py: 3 }}>
         {/* Search Bar */}
@@ -167,7 +219,7 @@ const MenuPage: React.FC = () => {
           <Grid container spacing={3}>
             {filtered.map((item) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
-                <MenuCard item={item} />
+                <MenuCard item={item} storeClosed={storeClosed?.enabled} />
               </Grid>
             ))}
           </Grid>

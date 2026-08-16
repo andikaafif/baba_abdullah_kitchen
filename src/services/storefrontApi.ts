@@ -80,6 +80,14 @@ export const storefrontApi = {
   getMaintenanceMode: () =>
     publicApi.get<{ maintenance_mode: boolean }>('/api/settings/maintenance'),
 
+  /** Check store closure status */
+  getStoreClosure: () =>
+    publicApi.get<{ enabled: boolean; message: string; reopen_at: string | null }>('/api/settings/store-closure'),
+
+  /** Get out-of-stock settings for all variants */
+  getOutOfStockSettings: () =>
+    publicApi.get<Array<{ variant_id: number; product_id: number; message: string | null; restock_at: string | null }>>('/api/settings/out-of-stock'),
+
   /** Place an order */
   createOrder: (data: CreateOrderPayload) =>
     publicApi.post<{ id: number; order_number: string; total_price: number }>('/api/orders', data),
