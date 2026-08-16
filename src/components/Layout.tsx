@@ -210,7 +210,7 @@ const Layout: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, pb: { xs: '56px', md: 0 } }}>
+      <Box component="main" sx={{ flexGrow: 1, pb: { xs: 'calc(64px + env(safe-area-inset-bottom))', md: 0 } }}>
         <Outlet />
       </Box>
 

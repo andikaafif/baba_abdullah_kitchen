@@ -3,6 +3,8 @@ export interface MenuVariant {
   label: string;
   pcs: string;
   price: number;
+  originalPrice?: number;
+  promoName?: string;
   stock?: number;
 }
 

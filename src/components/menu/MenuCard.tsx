@@ -19,6 +19,7 @@ import {
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import type { MenuItem, MenuVariant } from '../../types';
 import { useCartStore } from '../../store/cartStore';
 import { formatRupiah } from '../../utils/format';
@@ -63,10 +64,11 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
         <Box sx={{ position: 'relative' }}>
           <CardMedia
             component="img"
-            height="180"
+            height="200"
             image={item.image}
             alt={item.name}
             sx={{ objectFit: 'cover' }}
+            loading="lazy"
           />
           <Chip
             label={item.category}
@@ -105,15 +107,40 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
             >
               {item.variants.map((v) => (
                 <MuiMenuItem key={v.label} value={v.label} disabled={(v.stock ?? 0) <= 0}>
-                  {v.label} ({v.pcs}) — {formatRupiah(v.price)}{(v.stock ?? 0) <= 0 ? ' (Habis)' : ''}
+                  {v.label} ({v.pcs}) — {formatRupiah(v.price)}
+                  {v.originalPrice && v.originalPrice !== v.price && (
+                    <>&nbsp;<s style={{ opacity: 0.5, fontSize: '0.85em' }}>{formatRupiah(v.originalPrice)}</s></>
+                  )}
+                  {(v.stock ?? 0) <= 0 ? ' (Habis)' : ''}
                 </MuiMenuItem>
               ))}
             </Select>
           </FormControl>
 
-          <Typography variant="h6" color="primary" fontWeight={700}>
-            {formatRupiah(selectedVariant.price)}
-          </Typography>
+          {selectedVariant.promoName && (
+            <Chip
+              icon={<LocalOfferIcon />}
+              label={selectedVariant.promoName}
+              size="small"
+              color="error"
+              sx={{ mb: 1, fontWeight: 600, fontSize: '0.7rem' }}
+            />
+          )}
+
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
+            <Typography variant="h6" color="primary" fontWeight={700}>
+              {formatRupiah(selectedVariant.price)}
+            </Typography>
+            {selectedVariant.originalPrice && selectedVariant.originalPrice !== selectedVariant.price && (
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ textDecoration: 'line-through', opacity: 0.6 }}
+              >
+                {formatRupiah(selectedVariant.originalPrice)}
+              </Typography>
+            )}
+          </Box>
         </CardContent>
 
         <CardActions sx={{ px: 2, pb: 2, flexDirection: 'column', gap: 1 }}>

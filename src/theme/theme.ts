@@ -21,12 +21,30 @@ const sharedTypography: ThemeOptions['typography'] = {
 };
 
 const sharedComponents: ThemeOptions['components'] = {
+  MuiCssBaseline: {
+    styleOverrides: {
+      body: {
+        // Safe area insets for iOS Safari notch / home indicator
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+        // Prevent pull-to-refresh and overscroll bounce on Safari
+        overscrollBehavior: 'none',
+        // Smooth momentum scrolling on iOS
+        WebkitOverflowScrolling: 'touch',
+        // Prevent text size adjust on orientation change
+        WebkitTextSizeAdjust: '100%',
+      },
+    },
+  },
   MuiButton: {
     styleOverrides: {
       root: {
         borderRadius: 16,
         padding: '10px 24px',
         minHeight: 48,
+        // Prevent tap highlight flash on Safari
+        WebkitTapHighlightColor: 'transparent',
       },
     },
   },
@@ -34,6 +52,7 @@ const sharedComponents: ThemeOptions['components'] = {
     styleOverrides: {
       root: {
         borderRadius: 16,
+        WebkitTapHighlightColor: 'transparent',
       },
     },
   },
@@ -43,6 +62,7 @@ const sharedComponents: ThemeOptions['components'] = {
         borderRadius: 12,
         fontWeight: 600,
         minHeight: 36,
+        WebkitTapHighlightColor: 'transparent',
       },
     },
   },
@@ -60,13 +80,32 @@ const sharedComponents: ThemeOptions['components'] = {
       root: {
         height: 64,
         borderTop: `1px solid ${alpha(brandColors.primary, 0.12)}`,
+        // Account for iOS home indicator
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      },
+    },
+  },
+  MuiBottomNavigationAction: {
+    styleOverrides: {
+      root: {
+        minWidth: 56,
+        WebkitTapHighlightColor: 'transparent',
+      },
+    },
+  },
+  MuiIconButton: {
+    styleOverrides: {
+      root: {
+        WebkitTapHighlightColor: 'transparent',
       },
     },
   },
   MuiAppBar: {
     styleOverrides: {
       root: {
-        boxShadow: '0 2px 8px rgba(139, 69, 19, 0.12)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
       },
     },
   },

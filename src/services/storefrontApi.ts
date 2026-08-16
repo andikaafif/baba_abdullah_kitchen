@@ -34,6 +34,17 @@ export interface PublicShippingZone {
   shipping_cost: number;
 }
 
+export interface ActivePromotion {
+  id: number;
+  name: string;
+  description: string | null;
+  discount_type: 'percent' | 'fixed';
+  discount_value: number;
+  start_date: string;
+  end_date: string;
+  product_ids: number[];
+}
+
 export interface CreateOrderPayload {
   customer_name: string;
   customer_phone?: string;
@@ -50,6 +61,15 @@ export interface CreateOrderPayload {
   }>;
 }
 
+export interface PublicPromotion {
+  id: number;
+  name: string;
+  discount_type: 'percent' | 'fixed';
+  discount_value: number;
+  product_ids: number[];
+  variant_ids: number[];
+}
+
 export const storefrontApi = {
   /** Get active products with variants */
   getProducts: () =>
@@ -63,9 +83,17 @@ export const storefrontApi = {
   getShippingZones: () =>
     publicApi.get<PublicShippingZone[]>('/api/shipping-zones'),
 
+  /** Get active promotions */
+  getActivePromotions: () =>
+    publicApi.get<PublicPromotion[]>('/api/promotions/active'),
+
   /** Check maintenance mode */
   getMaintenanceMode: () =>
     publicApi.get<{ maintenance_mode: boolean }>('/api/settings/maintenance'),
+
+  /** Get active promotions (public, no auth) */
+  getActivePromotions: () =>
+    publicApi.get<ActivePromotion[]>('/api/promotions/active'),
 
   /** Place an order */
   createOrder: (data: CreateOrderPayload) =>

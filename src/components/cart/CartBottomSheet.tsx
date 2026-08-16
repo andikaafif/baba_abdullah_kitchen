@@ -98,6 +98,16 @@ const CartBottomSheet: React.FC = () => {
                   />
                   <Typography variant="body2" color="primary" fontWeight={600} mt={0.5}>
                     {formatRupiah(item.variant.price * item.quantity)}
+                    {item.variant.originalPrice && item.variant.originalPrice !== item.variant.price && (
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ textDecoration: 'line-through', ml: 0.5, opacity: 0.6 }}
+                      >
+                        {formatRupiah(item.variant.originalPrice * item.quantity)}
+                      </Typography>
+                    )}
                   </Typography>
                 </Box>
                 <Box
@@ -151,7 +161,7 @@ const CartBottomSheet: React.FC = () => {
       </Box>
 
       {items.length > 0 && (
-        <Box sx={{ px: 3, pt: 2, pb: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ px: 3, pt: 2, pb: `calc(12px + env(safe-area-inset-bottom))`, borderTop: '1px solid', borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
             <Typography variant="subtitle1" fontWeight={700}>
               Total
@@ -177,7 +187,7 @@ const CartBottomSheet: React.FC = () => {
       )}
 
       {items.length === 0 && (
-        <Box sx={{ px: 3, pb: 3 }}>
+        <Box sx={{ px: 3, pb: `calc(12px + env(safe-area-inset-bottom))` }}>
           <Button
             variant="outlined"
             fullWidth
