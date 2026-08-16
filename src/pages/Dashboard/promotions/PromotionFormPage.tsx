@@ -79,7 +79,7 @@ const PromotionFormPage: React.FC = () => {
     );
   };
 
-  const toggleAllVariantsOfProduct = (productId: number, variantIds: number[]) => {
+  const toggleAllVariantsOfProduct = (_productId: number, variantIds: number[]) => {
     const allSelected = variantIds.every((vid) => selectedVariantIds.includes(vid));
     if (allSelected) {
       setSelectedVariantIds((prev) => prev.filter((v) => !variantIds.includes(v)));
