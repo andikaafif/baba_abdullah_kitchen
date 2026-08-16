@@ -8,7 +8,7 @@ export interface MenuVariant {
   stock?: number;
 }
 
-export type MenuCategory = 'Kukus' | 'Mentai' | 'Cheese' | 'Frozen' | 'Birthday';
+export type MenuCategory = 'Kukus' | 'Mentai' | 'Cheese' | 'Frozen' | 'Birthday' | 'Lain - Lain' | 'Lain Lain';
 
 export interface MenuItem {
   id: string;
