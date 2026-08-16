@@ -44,6 +44,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const isOutOfStock = (selectedVariant.stock ?? 0) <= 0;
+  const hasAnyPromo = item.variants.some((v) => !!v.promoName);
 
   const handleAddToCart = () => {
     addItem(item, selectedVariant, quantity);
@@ -83,6 +84,21 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
               fontSize: '0.7rem',
             }}
           />
+          {hasAnyPromo && (
+            <Chip
+              icon={<LocalOfferIcon />}
+              label="Promo"
+              size="small"
+              color="error"
+              sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                fontWeight: 700,
+                fontSize: '0.7rem',
+              }}
+            />
+          )}
         </Box>
 
         <CardContent sx={{ flex: 1 }}>
@@ -117,7 +133,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
             </Select>
           </FormControl>
 
-          {selectedVariant.promoName && (
+          {/* {selectedVariant.promoName && (
             <Chip
               icon={<LocalOfferIcon />}
               label={selectedVariant.promoName}
@@ -125,7 +141,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
               color="error"
               sx={{ mb: 1, fontWeight: 600, fontSize: '0.7rem' }}
             />
-          )}
+          )} */}
 
           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
             <Typography variant="h6" color="primary" fontWeight={700}>
