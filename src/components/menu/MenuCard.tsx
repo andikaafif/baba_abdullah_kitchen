@@ -105,11 +105,13 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
           <Typography variant="h6" fontWeight={700} gutterBottom>
             {item.name}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.5 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
             {item.description}
           </Typography>
+        </CardContent>
 
-          <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+        <CardActions sx={{ px: 2, pb: 2, flexDirection: 'column', gap: 1 }}>
+          <FormControl fullWidth size="small" sx={{ mb: 0.5 }}>
             <InputLabel id={`variant-label-${item.id}`}>Pilih Varian</InputLabel>
             <Select
               labelId={`variant-label-${item.id}`}
@@ -133,17 +135,7 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
             </Select>
           </FormControl>
 
-          {/* {selectedVariant.promoName && (
-            <Chip
-              icon={<LocalOfferIcon />}
-              label={selectedVariant.promoName}
-              size="small"
-              color="error"
-              sx={{ mb: 1, fontWeight: 600, fontSize: '0.7rem' }}
-            />
-          )} */}
-
-          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, flexWrap: 'wrap', width: '100%', mb: 0.5 }}>
             <Typography variant="h6" color="primary" fontWeight={700}>
               {formatRupiah(selectedVariant.price)}
             </Typography>
@@ -157,9 +149,6 @@ const MenuCard: React.FC<MenuCardProps> = ({ item }) => {
               </Typography>
             )}
           </Box>
-        </CardContent>
-
-        <CardActions sx={{ px: 2, pb: 2, flexDirection: 'column', gap: 1 }}>
           <Box
             sx={{
               display: 'flex',

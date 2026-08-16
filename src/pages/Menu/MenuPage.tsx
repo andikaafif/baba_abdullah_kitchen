@@ -71,7 +71,11 @@ const MenuPage: React.FC = () => {
       const items = productsRes.data.map(mapProductToMenuItem);
       setMenuItems(applyPromotions(items, promosRes.data));
       const catNames = categoriesRes.data.map((c) => c.name);
-      setCategories(['All', ...catNames]);
+      const isLainCategory = (n: string) => n === 'Lain - Lain' || n === 'Lain Lain';
+      const sorted = catNames.filter((n) => !isLainCategory(n));
+      const lain = catNames.find(isLainCategory);
+      if (lain) sorted.push(lain);
+      setCategories(['All', ...sorted]);
     }).catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -80,6 +84,10 @@ const MenuPage: React.FC = () => {
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
     return matchesSearch && matchesCategory;
+  }).sort((a, b) => {
+    const aIsLain = (a.category === 'Lain - Lain' || a.category === 'Lain Lain') ? 1 : 0;
+    const bIsLain = (b.category === 'Lain - Lain' || b.category === 'Lain Lain') ? 1 : 0;
+    return aIsLain - bIsLain;
   });
 
   return (
