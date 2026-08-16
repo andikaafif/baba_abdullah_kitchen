@@ -7,11 +7,11 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+07:00";
 
-CREATE DATABASE IF NOT EXISTS `mustsee02_baba_menu`
+CREATE DATABASE IF NOT EXISTS `baba_abdullah_kitchen`
   DEFAULT CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE `mustsee02_baba_menu`;
+USE `baba_abdullah_kitchen`;
 
 -- ------------------------------------------------------------
 -- Table: categories
@@ -140,6 +140,22 @@ CREATE TABLE `promotion_products` (
     ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_pp_product`
     FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------------
+-- Table: promotion_variants  (pivot — variant-level promos)
+-- ------------------------------------------------------------
+CREATE TABLE `promotion_variants` (
+  `promotion_id`       INT UNSIGNED NOT NULL,
+  `product_variant_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`promotion_id`, `product_variant_id`),
+  KEY `fk_pv_variant` (`product_variant_id`),
+  CONSTRAINT `fk_pv_promotion`
+    FOREIGN KEY (`promotion_id`) REFERENCES `promotions` (`id`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_pv_variant`
+    FOREIGN KEY (`product_variant_id`) REFERENCES `product_variants` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -312,7 +328,7 @@ INSERT INTO `product_variants` (`product_id`, `label`, `pcs`, `price`, `cost_pri
 
 -- Admin user (password: admin123 — bcrypt hash)
 INSERT INTO `admin_users` (`username`, `password`) VALUES
-  ('admin', '$2b$10$Xk1Q6FvGwJzQ2V3KqW5e3eP7KqJdF5JfZ9S6WzHpLmNvYtRkXcJvC');
+  ('admin', '$2b$10$MpU.ANOYrpZfeyHeVK3JZ.yWYfnbSJ3wQyx8uMj5zFgFHXxVndrsK');
 
 -- Sample Orders (last 30 days)
 INSERT INTO `orders`

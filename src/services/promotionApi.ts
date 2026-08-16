@@ -1,5 +1,14 @@
 import api from './api';
 
+export interface PromotionVariant {
+  id: number;
+  label: string;
+  pcs: string;
+  price: number;
+  product_id: number;
+  product_name: string;
+}
+
 export interface Promotion {
   id: number;
   name: string;
@@ -10,6 +19,7 @@ export interface Promotion {
   end_date: string;
   is_active: number;
   products: Array<{ id: number; name: string }>;
+  variants: PromotionVariant[];
 }
 
 export interface PromotionPayload {
@@ -21,6 +31,7 @@ export interface PromotionPayload {
   end_date: string;
   is_active?: number;
   product_ids?: number[];
+  variant_ids?: number[];
 }
 
 export const promotionApi = {

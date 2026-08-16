@@ -17,7 +17,25 @@ import MenuCard from '../../components/menu/MenuCard';
 import MenuCardSkeleton from '../../components/menu/MenuCardSkeleton';
 import { useCartStore } from '../../store/cartStore';
 import { useUIStore } from '../../store/uiStore';
-import { storefrontApi, type PublicProduct, API_BASE } from '../../services/storefrontApi';
+import { storefrontApi, type PublicProduct, type PublicPromotion, API_BASE } from '../../services/storefrontApi';
+
+function applyPromotions(items: MenuItem[], promos: PublicPromotion[]): MenuItem[] {
+  return items.map((item) => ({
+    ...item,
+    variants: item.variants.map((v) => {
+      const promo = promos.find(
+        (p) => p.product_ids.includes(Number(item.id)) || (v.id && p.variant_ids.includes(v.id))
+      );
+      if (!promo) return v;
+      const discounted =
+        promo.discount_type === 'percent'
+          ? v.price - v.price * (Number(promo.discount_value) / 100)
+          : v.price - Number(promo.discount_value);
+      const finalPrice = Math.max(0, Math.round(discounted));
+      return { ...v, originalPrice: v.price, price: finalPrice, promoName: promo.name };
+    }),
+  }));
+}
 
 function mapProductToMenuItem(p: PublicProduct): MenuItem {
   const resolveImage = (url: string | null) => {
@@ -48,8 +66,10 @@ const MenuPage: React.FC = () => {
     Promise.all([
       storefrontApi.getProducts(),
       storefrontApi.getCategories(),
-    ]).then(([productsRes, categoriesRes]) => {
-      setMenuItems(productsRes.data.map(mapProductToMenuItem));
+      storefrontApi.getActivePromotions(),
+    ]).then(([productsRes, categoriesRes, promosRes]) => {
+      const items = productsRes.data.map(mapProductToMenuItem);
+      setMenuItems(applyPromotions(items, promosRes.data));
       const catNames = categoriesRes.data.map((c) => c.name);
       setCategories(['All', ...catNames]);
     }).catch(() => {})
@@ -153,7 +173,7 @@ const MenuPage: React.FC = () => {
         onClick={() => setCartSheetOpen(true)}
         sx={{
           position: 'fixed',
-          bottom: { xs: 80, md: 24 },
+          bottom: { xs: 'calc(80px + env(safe-area-inset-bottom))', md: 24 },
           right: 24,
           transition: 'transform 0.2s ease',
           transform: cartTotal > 0 ? 'scale(1.05)' : 'scale(1)',

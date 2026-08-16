@@ -6,6 +6,37 @@ const router = Router();
 
 /**
  * @openapi
+ * /api/promotions/active:
+ *   get:
+ *     summary: List active, non-expired promotions with linked product IDs (public)
+ *     tags: [Promotions]
+ */
+router.get('/active', async (_req: Request, res: Response) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const [promos] = await pool.query<any[]>(
+    `SELECT id, name, description, discount_type, discount_value, start_date, end_date
+     FROM promotions
+     WHERE is_active = 1 AND start_date <= ? AND end_date >= ?
+     ORDER BY created_at DESC`,
+    [today, today]
+  );
+  for (const p of promos) {
+    const [products] = await pool.query<any[]>(
+      `SELECT pp.product_id FROM promotion_products pp WHERE pp.promotion_id = ?`,
+      [p.id]
+    );
+    p.product_ids = products.map((r: any) => r.product_id);
+    const [variants] = await pool.query<any[]>(
+      `SELECT pv.product_variant_id FROM promotion_variants pv WHERE pv.promotion_id = ?`,
+      [p.id]
+    );
+    p.variant_ids = variants.map((r: any) => r.product_variant_id);
+  }
+  res.json(promos);
+});
+
+/**
+ * @openapi
  * /api/promotions:
  *   get:
  *     summary: List all promotions
@@ -25,6 +56,16 @@ router.get('/', authMiddleware, async (_req: Request, res: Response) => {
       [p.id]
     );
     p.products = products;
+    const [variants] = await pool.query<any[]>(
+      `SELECT pv.product_variant_id AS id, pvr.label, pvr.pcs, pvr.price, pvr.product_id,
+              prod.name AS product_name
+       FROM promotion_variants pv
+       JOIN product_variants pvr ON pvr.id = pv.product_variant_id
+       JOIN products prod ON prod.id = pvr.product_id
+       WHERE pv.promotion_id = ?`,
+      [p.id]
+    );
+    p.variants = variants;
   }
   res.json(promos);
 });
@@ -47,7 +88,16 @@ router.get('/:id', authMiddleware, async (req: Request, res: Response) => {
      WHERE pp.promotion_id = ?`,
     [req.params.id]
   );
-  res.json({ ...rows[0], products });
+  const [variants] = await pool.query<any[]>(
+    `SELECT pv.product_variant_id AS id, pvr.label, pvr.pcs, pvr.price, pvr.product_id,
+            prod.name AS product_name
+     FROM promotion_variants pv
+     JOIN product_variants pvr ON pvr.id = pv.product_variant_id
+     JOIN products prod ON prod.id = pvr.product_id
+     WHERE pv.promotion_id = ?`,
+    [req.params.id]
+  );
+  res.json({ ...rows[0], products, variants });
 });
 
 /**
@@ -60,11 +110,11 @@ router.get('/:id', authMiddleware, async (req: Request, res: Response) => {
  *       - bearerAuth: []
  */
 router.post('/', authMiddleware, async (req: Request, res: Response) => {
-  const { name, description, discount_type, discount_value, start_date, end_date, is_active, product_ids } =
+  const { name, description, discount_type, discount_value, start_date, end_date, is_active, product_ids, variant_ids } =
     req.body as {
       name: string; description?: string; discount_type: string;
       discount_value: number; start_date: string; end_date: string;
-      is_active?: number; product_ids?: number[];
+      is_active?: number; product_ids?: number[]; variant_ids?: number[];
     };
 
   const conn = await pool.getConnection();
@@ -81,6 +131,14 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
         await conn.query(
           'INSERT INTO promotion_products (promotion_id, product_id) VALUES (?, ?)',
           [promoId, pid]
+        );
+      }
+    }
+    if (variant_ids?.length) {
+      for (const vid of variant_ids) {
+        await conn.query(
+          'INSERT INTO promotion_variants (promotion_id, product_variant_id) VALUES (?, ?)',
+          [promoId, vid]
         );
       }
     }
@@ -104,11 +162,11 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
  *       - bearerAuth: []
  */
 router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
-  const { name, description, discount_type, discount_value, start_date, end_date, is_active, product_ids } =
+  const { name, description, discount_type, discount_value, start_date, end_date, is_active, product_ids, variant_ids } =
     req.body as {
       name: string; description?: string; discount_type: string;
       discount_value: number; start_date: string; end_date: string;
-      is_active?: number; product_ids?: number[];
+      is_active?: number; product_ids?: number[]; variant_ids?: number[];
     };
 
   const conn = await pool.getConnection();
@@ -125,6 +183,15 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
         await conn.query(
           'INSERT INTO promotion_products (promotion_id, product_id) VALUES (?, ?)',
           [req.params.id, pid]
+        );
+      }
+    }
+    if (variant_ids !== undefined) {
+      await conn.query('DELETE FROM promotion_variants WHERE promotion_id = ?', [req.params.id]);
+      for (const vid of variant_ids) {
+        await conn.query(
+          'INSERT INTO promotion_variants (promotion_id, product_variant_id) VALUES (?, ?)',
+          [req.params.id, vid]
         );
       }
     }

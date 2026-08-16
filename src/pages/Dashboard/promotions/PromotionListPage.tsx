@@ -100,6 +100,11 @@ const PromotionListPage: React.FC = () => {
                       {p.products?.slice(0, 2).map((pr) => pr.name).join(', ')}
                       {(p.products?.length ?? 0) > 2 ? `, +${(p.products?.length ?? 0) - 2}` : ''}
                     </Typography>
+                    {(p.variants?.length ?? 0) > 0 && (
+                      <Typography variant="caption" color="primary" sx={{ display: 'block' }}>
+                        + {p.variants.length} varian spesifik
+                      </Typography>
+                    )}
                   </TableCell>
                   <TableCell>
                     {isExpired(p) ? (

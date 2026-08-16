@@ -8,7 +8,7 @@ import ChildCareIcon from '@mui/icons-material/ChildCare';
 import StarIcon from '@mui/icons-material/Star';
 import GrainIcon from '@mui/icons-material/Grain';
 import MenuCard from '../../components/menu/MenuCard';
-import { storefrontApi, type PublicProduct } from '../../services/storefrontApi';
+import { storefrontApi, type PublicProduct, type PublicPromotion } from '../../services/storefrontApi';
 import type { MenuItem } from '../../types';
 import { API_BASE } from '../../services/storefrontApi';
 
@@ -57,16 +57,39 @@ function mapProductToMenuItem(p: PublicProduct): MenuItem {
   };
 }
 
+function applyPromotions(items: MenuItem[], promos: PublicPromotion[]): MenuItem[] {
+  return items.map((item) => ({
+    ...item,
+    variants: item.variants.map((v) => {
+      // Find promo that applies: product-level or variant-level
+      const promo = promos.find(
+        (p) => p.product_ids.includes(Number(item.id)) || (v.id && p.variant_ids.includes(v.id))
+      );
+      if (!promo) return v;
+      const discounted =
+        promo.discount_type === 'percent'
+          ? v.price - v.price * (Number(promo.discount_value) / 100)
+          : v.price - Number(promo.discount_value);
+      const finalPrice = Math.max(0, Math.round(discounted));
+      return { ...v, originalPrice: v.price, price: finalPrice, promoName: promo.name };
+    }),
+  }));
+}
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    storefrontApi.getProducts()
-      .then((res) => {
+    Promise.all([
+      storefrontApi.getProducts(),
+      storefrontApi.getActivePromotions(),
+    ])
+      .then(([res, promosRes]) => {
         const products = res.data.slice(0, 4);
-        setFeaturedItems(products.map(mapProductToMenuItem));
+        const items = products.map(mapProductToMenuItem);
+        setFeaturedItems(applyPromotions(items, promosRes.data));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -170,7 +193,7 @@ const HomePage: React.FC = () => {
         </Typography>
         <Grid container spacing={3} justifyContent="center">
           {benefits.map((b) => (
-            <Grid size={{ xs: 6, sm: 4, md: 2.4 }} key={b.title}>
+            <Grid size={{ xs: 6, sm: 4, md: 2 }} key={b.title}>
               <Card
                 sx={{
                   textAlign: 'center',
