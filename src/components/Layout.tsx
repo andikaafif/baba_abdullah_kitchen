@@ -72,10 +72,10 @@ const Layout: React.FC = () => {
 
   if (maintenance) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', justifyContent: 'center', alignItems: 'center', bgcolor: '#FFF8F0' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', justifyContent: 'center', alignItems: 'center', bgcolor: '#FFFAF5' }}>
         <Container maxWidth="sm" sx={{ textAlign: 'center', py: 8 }}>
-          <ConstructionIcon sx={{ fontSize: 80, color: '#8B4513', mb: 2 }} />
-          <Typography variant="h4" fontWeight={700} color="#8B4513" gutterBottom>
+          <ConstructionIcon sx={{ fontSize: 80, color: '#A0522D', mb: 2 }} />
+          <Typography variant="h4" fontWeight={700} color="#A0522D" gutterBottom>
             Sedang Dalam Pemeliharaan
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
@@ -122,7 +122,7 @@ const Layout: React.FC = () => {
               variant="h6"
               fontWeight={700}
               color="primary"
-              sx={{ cursor: 'pointer', mr: 4 }}
+              sx={{ cursor: 'pointer', mr: 4, letterSpacing: '-0.01em' }}
               onClick={() => navigate('/')}
             >
               🥟 Dapoer Baba Abdullah

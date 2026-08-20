@@ -39,6 +39,8 @@ const CartBottomSheet: React.FC = () => {
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             maxHeight: '85vh',
+            maxWidth: 480,
+            mx: 'auto',
           },
         },
       }}

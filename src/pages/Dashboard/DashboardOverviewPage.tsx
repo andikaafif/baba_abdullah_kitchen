@@ -18,14 +18,18 @@ const KpiCard: React.FC<{
   title: string; value: string; subtitle: string;
   icon: React.ReactNode; color: string;
 }> = ({ title, value, subtitle, icon, color }) => (
-  <Card>
+  <Card sx={{ transition: 'all 0.3s ease', '&:hover': { transform: 'translateY(-4px)' } }}>
     <CardContent sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-      <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: color + '20' }}>
+      <Box sx={{
+        p: 1.5, borderRadius: 3,
+        background: `linear-gradient(135deg, ${color}18, ${color}30)`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
         <Box sx={{ color }}>{icon}</Box>
       </Box>
       <Box flex={1}>
-        <Typography variant="body2" color="text.secondary">{title}</Typography>
-        <Typography variant="h5" fontWeight={700} mt={0.25}>{value}</Typography>
+        <Typography variant="body2" color="text.secondary" fontSize="0.78rem">{title}</Typography>
+        <Typography variant="h5" fontWeight={700} mt={0.25} letterSpacing="-0.01em">{value}</Typography>
         <Typography variant="caption" color="text.secondary">{subtitle}</Typography>
       </Box>
     </CardContent>
@@ -67,19 +71,19 @@ const DashboardOverviewPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} mb={0.5}>Overview Dashboard</Typography>
+      <Typography variant="h5" fontWeight={700} mb={0.5} letterSpacing="-0.01em">Overview Dashboard</Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>
         Selamat datang! Berikut ringkasan bulan ini.
       </Typography>
 
-      <Grid container spacing={2} mb={4}>
+      <Grid container spacing={2.5} mb={4}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <KpiCard
             title="Pendapatan Bulan Ini (Gross)"
             value={formatRp(totalRevenue)}
             subtitle="Total semua pesanan"
             icon={<TrendingUp />}
-            color="#8B4513"
+            color="#A0522D"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -133,7 +137,7 @@ const DashboardOverviewPage: React.FC = () => {
               ) : (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={monthlySales ?? []} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0e0d0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0e6dc" vertical={false} />
                     <XAxis
                       dataKey="period_label"
                       tickFormatter={(v: string) => v.slice(5)}
@@ -144,7 +148,7 @@ const DashboardOverviewPage: React.FC = () => {
                       formatter={(val) => [formatRp(Number(val)), 'Pendapatan']}
                       labelFormatter={(l) => `Tanggal: ${String(l)}`}
                     />
-                    <Bar dataKey="total_revenue" fill="#8B4513" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="total_revenue" fill="#A0522D" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -168,8 +172,8 @@ const DashboardOverviewPage: React.FC = () => {
                       <Box
                         sx={{
                           width: 28, height: 28, borderRadius: '50%',
-                          bgcolor: ['#8B4513', '#D4A373', '#F6C453', '#43A047', '#1976D2'][i] + '20',
-                          color: ['#8B4513', '#D4A373', '#F6C453', '#43A047', '#1976D2'][i],
+                          bgcolor: ['#A0522D', '#E8B88A', '#F6C453', '#43A047', '#1976D2'][i] + '18',
+                          color: ['#A0522D', '#E8B88A', '#F6C453', '#43A047', '#1976D2'][i],
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontWeight: 700, fontSize: 12, flexShrink: 0,
                         }}
@@ -187,7 +191,7 @@ const DashboardOverviewPage: React.FC = () => {
                       <Chip
                         label={v.category_name}
                         size="small"
-                        sx={{ bgcolor: '#FFF3E0', color: '#8B4513', fontWeight: 600, fontSize: 10 }}
+                        sx={{ bgcolor: '#FFF3E0', color: '#A0522D', fontWeight: 600, fontSize: 10 }}
                       />
                     </Box>
                   ))}

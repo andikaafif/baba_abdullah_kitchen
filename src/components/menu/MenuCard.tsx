@@ -62,15 +62,20 @@ const MenuCard: React.FC<MenuCardProps> = ({ item, storeClosed }) => {
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
+          overflow: 'hidden',
+          '&:hover .menu-card-image': {
+            transform: 'scale(1.06)',
+          },
         }}
       >
-        <Box sx={{ position: 'relative' }}>
+        <Box sx={{ position: 'relative', overflow: 'hidden' }}>
           <CardMedia
             component="img"
             height="200"
             image={item.image}
             alt={item.name}
-            sx={{ objectFit: 'cover' }}
+            className="menu-card-image"
+            sx={{ objectFit: 'cover', transition: 'transform 0.5s cubic-bezier(.4,0,.2,1)' }}
             loading="lazy"
           />
           <Chip

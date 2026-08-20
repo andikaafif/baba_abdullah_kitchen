@@ -4,10 +4,11 @@ import {
   Box, Typography, Card, CardContent, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, TextField, Button,
   IconButton, Alert, CircularProgress, Chip, InputAdornment, TablePagination,
-  Collapse, Checkbox,
+  Collapse, Checkbox, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
-import { ArrowBack, Save, Search, AddBox, Close, LocalShipping, RemoveShoppingCart } from '@mui/icons-material';
+import { ArrowBack, Save, Search, AddBox, Close, LocalShipping, RemoveShoppingCart, Edit, Delete } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { settingsApi, type OutOfStockSetting } from '../../../services/settingsApi';
 import { productApi } from '../../../services/productApi';
 
 const InventoryPage: React.FC = () => {
@@ -18,12 +19,14 @@ const InventoryPage: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [page, setPage] = useState(0);
   const rowsPerPage = 15;
+  const [activeTab, setActiveTab] = useState(0);
 
   // Bulk incoming stock state
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkQty, setBulkQty] = useState('');
   const [bulkNotes, setBulkNotes] = useState('');
   const [bulkApplied, setBulkApplied] = useState(false);
+  const [bulkSelectedVariants, setBulkSelectedVariants] = useState<Set<number>>(new Set());
 
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products-inventory', search],
@@ -54,6 +57,7 @@ const InventoryPage: React.FC = () => {
       setBulkApplied(false);
       setBulkQty('');
       setBulkNotes('');
+      setBulkSelectedVariants(new Set());
       setTimeout(() => setSaveSuccess(false), 3000);
     },
   });
@@ -77,12 +81,15 @@ const InventoryPage: React.FC = () => {
     const qty = Number(bulkQty);
     if (!qty || !products) return;
     const allVariants = products.flatMap((p) => (p.variants ?? []).filter((v) => v.id != null));
-    const variantCount = allVariants.length;
+    const targetVariants = bulkSelectedVariants.size > 0
+      ? allVariants.filter((v) => bulkSelectedVariants.has(v.id!))
+      : allVariants;
+    const variantCount = targetVariants.length;
     if (variantCount === 0) return;
     const perVariant = Math.floor(qty / variantCount);
     const remainder = qty % variantCount;
     const newEdits: Record<number, { stock: string; reason: string }> = {};
-    allVariants.forEach((v, i) => {
+    targetVariants.forEach((v, i) => {
       const addition = perVariant + (i < remainder ? 1 : 0);
       newEdits[v.id!] = {
         stock: String((v.stock ?? 0) + addition),
@@ -98,6 +105,7 @@ const InventoryPage: React.FC = () => {
     setBulkApplied(false);
     setBulkQty('');
     setBulkNotes('');
+    setBulkSelectedVariants(new Set());
   };
 
   // Count how many "Stok Baru" fields are filled
@@ -133,13 +141,14 @@ const InventoryPage: React.FC = () => {
       setBulkApplied(false);
       setBulkQty('');
       setBulkNotes('');
+      setBulkSelectedVariants(new Set());
       setTimeout(() => setSaveSuccess(false), 3000);
     },
   });
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <IconButton onClick={() => navigate('/dashboard')}><ArrowBack /></IconButton>
         <Box>
           <Typography variant="h5" fontWeight={700}>Manajemen Inventori</Typography>
@@ -147,6 +156,13 @@ const InventoryPage: React.FC = () => {
         </Box>
       </Box>
 
+      <Tabs value={activeTab} onChange={(_e, v) => setActiveTab(v)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
+        <Tab label="Stok Produk" />
+        <Tab label="Set Produk Habis" />
+        <Tab label="Pengaturan Out-of-Stock" />
+      </Tabs>
+
+      {activeTab === 0 && (<>
       {saveSuccess && <Alert severity="success" sx={{ mb: 2 }}>Stok berhasil diperbarui!</Alert>}
       {error && <Alert severity="error" sx={{ mb: 2 }}>Gagal memuat data. Pastikan backend berjalan.</Alert>}
 
@@ -174,18 +190,18 @@ const InventoryPage: React.FC = () => {
       </Box>
 
       <Collapse in={bulkOpen}>
-        <Card sx={{ mb: 2, border: '2px solid #D4A373', bgcolor: '#FFFAF5' }}>
+        <Card sx={{ mb: 2, border: '2px solid #E8B88A', bgcolor: '#FFFAF5' }}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <LocalShipping sx={{ color: '#8B4513' }} />
-              <Typography variant="subtitle1" fontWeight={700} color="#8B4513">
+              <LocalShipping sx={{ color: '#A0522D' }} />
+              <Typography variant="subtitle1" fontWeight={700} color="#A0522D">
                 Stok Masuk Otomatis
               </Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" mb={2}>
-              Masukkan total jumlah stok masuk. Stok akan dibagi rata ke semua varian yang tersedia. Hasil akan ditampilkan di kolom "Stok Baru" sebagai preview sebelum disimpan.
+              Masukkan total jumlah stok masuk. Pilih varian yang ingin diisi (atau kosongkan untuk semua). Stok akan dibagi rata ke varian yang dipilih.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'flex-start', mb: 2 }}>
               <TextField
                 label="Jumlah Stok Masuk"
                 type="number"
@@ -226,9 +242,50 @@ const InventoryPage: React.FC = () => {
                 </Button>
               )}
             </Box>
+
+            {/* Variant selection */}
+            {!bulkApplied && products && (() => {
+              const allVars = products.flatMap((p) => (p.variants ?? []).filter((v) => v.id != null).map((v) => ({ id: v.id!, label: `${p.name} — ${v.label} (${v.pcs})` })));
+              const allSelected = bulkSelectedVariants.size === allVars.length && allVars.length > 0;
+              return (
+                <Box sx={{ maxHeight: 200, overflowY: 'auto', border: '1px solid', borderColor: 'divider', borderRadius: '12px', p: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                    <Checkbox
+                      size="small"
+                      checked={allSelected}
+                      indeterminate={bulkSelectedVariants.size > 0 && !allSelected}
+                      onChange={() => {
+                        if (allSelected) setBulkSelectedVariants(new Set());
+                        else setBulkSelectedVariants(new Set(allVars.map((v) => v.id)));
+                      }}
+                    />
+                    <Typography variant="caption" fontWeight={600}>
+                      {bulkSelectedVariants.size === 0 ? 'Semua varian (default)' : `${bulkSelectedVariants.size} varian dipilih`}
+                    </Typography>
+                  </Box>
+                  {allVars.map((v) => (
+                    <Box key={v.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Checkbox
+                        size="small"
+                        checked={bulkSelectedVariants.has(v.id)}
+                        onChange={() => {
+                          setBulkSelectedVariants((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(v.id)) next.delete(v.id); else next.add(v.id);
+                            return next;
+                          });
+                        }}
+                      />
+                      <Typography variant="caption">{v.label}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              );
+            })()}
+
             {bulkApplied && (
               <Alert severity="info" sx={{ mt: 2 }}>
-                Preview diterapkan: {bulkQty} stok dibagi rata ke {products?.flatMap((p) => (p.variants ?? []).filter((v) => v.id != null)).length ?? 0} varian. Periksa kolom "Stok Baru", lalu klik "Simpan" per baris untuk menyimpan, atau "Batalkan" untuk membersihkan semua.
+                Preview diterapkan: {bulkQty} stok dibagi rata ke {Object.keys(stockEdits).length} varian. Periksa kolom "Stok Baru", lalu klik "Simpan" per baris untuk menyimpan, atau "Batalkan" untuk membersihkan semua.
               </Alert>
             )}
            </CardContent>
@@ -250,7 +307,7 @@ const InventoryPage: React.FC = () => {
         </Box>
       )}
 
-      <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+      <TableContainer component={Paper} sx={{ borderRadius: '12px' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: '#FFF3E0' }}>
@@ -358,9 +415,15 @@ const InventoryPage: React.FC = () => {
           rowsPerPageOptions={[15]}
         />
       </TableContainer>
+      </>)}
 
-      {/* ─── Out-of-Stock Management Section ─── */}
+      {activeTab === 1 && (
       <OutOfStockSection products={products} isLoading={isLoading} />
+      )}
+
+      {activeTab === 2 && (
+      <OosSettingsSection />
+      )}
     </Box>
   );
 };
@@ -462,7 +525,7 @@ const OutOfStockSection: React.FC<OosSectionProps> = ({ products, isLoading: pro
           Semua varian sudah habis (stok 0).
         </Alert>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+        <TableContainer component={Paper} sx={{ borderRadius: '12px' }}>
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: '#FFEBEE' }}>
@@ -511,3 +574,126 @@ const OutOfStockSection: React.FC<OosSectionProps> = ({ products, isLoading: pro
 };
 
 export default InventoryPage;
+
+// ─── OOS Settings Section (moved from MaintenancePage) ───
+const OosSettingsSection: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { data: oosData, isLoading: loadingOos } = useQuery({
+    queryKey: ['out-of-stock-settings'],
+    queryFn: () => settingsApi.getOutOfStockSettings().then((r) => r.data),
+  });
+  const oosMutation = useMutation({
+    mutationFn: settingsApi.setOutOfStockSetting,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['out-of-stock-settings'] }),
+  });
+  const oosDeleteMutation = useMutation({
+    mutationFn: settingsApi.deleteOutOfStockSetting,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['out-of-stock-settings'] }),
+  });
+  const [editDialog, setEditDialog] = useState<OutOfStockSetting | null>(null);
+  const [editMessage, setEditMessage] = useState('');
+  const [editRestockAt, setEditRestockAt] = useState('');
+
+  const openEditDialog = (item: OutOfStockSetting) => {
+    setEditDialog(item);
+    setEditMessage(item.message || '');
+    setEditRestockAt(item.restock_at ? item.restock_at.slice(0, 16) : '');
+  };
+
+  const handleSaveOos = () => {
+    if (!editDialog) return;
+    oosMutation.mutate({
+      variant_id: editDialog.variant_id,
+      product_id: editDialog.product_id,
+      message: editMessage,
+      restock_at: editRestockAt || null,
+    }, { onSuccess: () => setEditDialog(null) });
+  };
+
+  return (
+    <Box>
+      <Typography variant="h6" fontWeight={700} mb={1}>Pengaturan Produk Habis (Out of Stock)</Typography>
+      <Typography variant="body2" color="text.secondary" mb={2}>
+        Kustomisasi pesan dan jadwal restock untuk produk yang stoknya habis.
+      </Typography>
+
+      {loadingOos ? <CircularProgress /> : (
+        <>
+          {(!oosData || oosData.length === 0) ? (
+            <Alert severity="info" sx={{ maxWidth: 600 }}>
+              Belum ada pengaturan khusus untuk produk habis. Pengaturan otomatis ditambahkan ketika stok varian menjadi 0.
+            </Alert>
+          ) : (
+            <TableContainer component={Paper} sx={{ borderRadius: '12px', maxWidth: 900 }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell><strong>Produk</strong></TableCell>
+                    <TableCell><strong>Varian</strong></TableCell>
+                    <TableCell><strong>Pesan</strong></TableCell>
+                    <TableCell><strong>Restock</strong></TableCell>
+                    <TableCell align="right"><strong>Aksi</strong></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {oosData.map((item) => (
+                    <TableRow key={item.variant_id}>
+                      <TableCell>{item.product_name}</TableCell>
+                      <TableCell>{item.variant_label}</TableCell>
+                      <TableCell>{item.message || <em style={{ opacity: 0.5 }}>—</em>}</TableCell>
+                      <TableCell>
+                        {item.restock_at
+                          ? new Date(item.restock_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+                          : <em style={{ opacity: 0.5 }}>—</em>}
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton size="small" onClick={() => openEditDialog(item)}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" color="error" onClick={() => oosDeleteMutation.mutate(item.variant_id)}>
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </>
+      )}
+
+      <Dialog open={!!editDialog} onClose={() => setEditDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Pengaturan Produk Habis</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
+          <Typography variant="body2" color="text.secondary">
+            <strong>{editDialog?.product_name}</strong> — {editDialog?.variant_label}
+          </Typography>
+          <TextField
+            label="Pesan kustom untuk pelanggan"
+            fullWidth
+            multiline
+            minRows={2}
+            value={editMessage}
+            onChange={(e) => setEditMessage(e.target.value)}
+            placeholder="Contoh: Stok habis, estimasi restock Senin depan"
+          />
+          <TextField
+            label="Estimasi restock"
+            type="datetime-local"
+            fullWidth
+            value={editRestockAt}
+            onChange={(e) => setEditRestockAt(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialog(null)}>Batal</Button>
+          <Button variant="contained" onClick={handleSaveOos} disabled={oosMutation.isPending}>
+            Simpan
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};

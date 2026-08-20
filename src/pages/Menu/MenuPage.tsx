@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { alpha } from '@mui/material/styles';
 import {
   Box,
   Container,
@@ -123,17 +124,28 @@ const MenuPage: React.FC = () => {
       {/* Page Header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #8B4513 0%, #B5651D 100%)',
+          background: 'linear-gradient(135deg, #A0522D 0%, #C4784A 100%)',
           color: 'white',
-          py: 4,
+          py: 5,
           px: 3,
           textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -1,
+            left: 0,
+            right: 0,
+            height: 32,
+            background: (theme) => `linear-gradient(transparent, ${theme.palette.background.default})`,
+          },
         }}
       >
-        <Typography variant="h4" fontWeight={700}>
+        <Typography variant="h4" fontWeight={700} sx={{ animation: 'fadeInUp 0.5s ease both' }}>
           Menu Kami
         </Typography>
-        <Typography variant="body1" sx={{ opacity: 0.85, mt: 0.5 }}>
+        <Typography variant="body1" sx={{ opacity: 0.88, mt: 0.5, animation: 'fadeInUp 0.5s ease 0.1s both' }}>
           Pilih dim sum favoritmu 🥟
         </Typography>
       </Box>
@@ -162,14 +174,20 @@ const MenuPage: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      <Container maxWidth="lg" sx={{ py: 3 }}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Search Bar */}
         <TextField
           fullWidth
           placeholder="Cari menu..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          sx={{ mb: 2 }}
+          sx={{
+            mb: 2.5,
+            '& .MuiOutlinedInput-root': {
+              background: (theme) => alpha(theme.palette.background.paper, 0.8),
+              backdropFilter: 'blur(8px)',
+            },
+          }}
           slotProps={{
             input: {
               startAdornment: (
@@ -183,7 +201,7 @@ const MenuPage: React.FC = () => {
         />
 
         {/* Category Chips */}
-        <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 1, mb: 4, flexWrap: 'wrap' }}>
           {categories.map((cat) => (
             <Chip
               key={cat}
@@ -192,7 +210,13 @@ const MenuPage: React.FC = () => {
               color={activeCategory === cat ? 'primary' : 'default'}
               variant={activeCategory === cat ? 'filled' : 'outlined'}
               aria-label={`Filter kategori ${cat}`}
-              sx={{ fontWeight: 600 }}
+              sx={{
+                fontWeight: 600,
+                transition: 'all 0.25s ease',
+                ...(activeCategory === cat && {
+                  boxShadow: '0 2px 8px rgba(160,82,45,0.25)',
+                }),
+              }}
             />
           ))}
         </Box>

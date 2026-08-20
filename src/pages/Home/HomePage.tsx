@@ -123,9 +123,9 @@ const HomePage: React.FC = () => {
       {/* Hero Banner */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #8B4513 0%, #B5651D 50%, #D4A373 100%)',
+          background: 'linear-gradient(135deg, #A0522D 0%, #C4784A 40%, #E8B88A 100%)',
           color: 'white',
-          py: { xs: 8, md: 12 },
+          py: { xs: 10, md: 14 },
           px: 3,
           textAlign: 'center',
           position: 'relative',
@@ -133,46 +133,80 @@ const HomePage: React.FC = () => {
           '&::before': {
             content: '""',
             position: 'absolute',
-            top: -50,
-            right: -50,
-            width: 200,
-            height: 200,
+            top: -80,
+            right: -80,
+            width: 300,
+            height: 300,
             borderRadius: '50%',
-            bgcolor: 'rgba(246, 196, 83, 0.2)',
+            background: 'radial-gradient(circle, rgba(246,196,83,0.3) 0%, transparent 70%)',
+            animation: 'float 6s ease-in-out infinite',
           },
           '&::after': {
             content: '""',
             position: 'absolute',
-            bottom: -80,
-            left: -60,
-            width: 250,
-            height: 250,
+            bottom: -100,
+            left: -80,
+            width: 350,
+            height: 350,
             borderRadius: '50%',
-            bgcolor: 'rgba(255, 255, 255, 0.08)',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite 1s',
           },
         }}
       >
-        <Container maxWidth="md">
+        {/* Floating food emojis */}
+        {['🥟', '🍜', '🥢', '🫕'].map((emoji, i) => (
+          <Box
+            key={i}
+            sx={{
+              position: 'absolute',
+              fontSize: { xs: '2rem', md: '2.5rem' },
+              opacity: 0.15,
+              animation: `float ${5 + i}s ease-in-out infinite ${i * 0.7}s`,
+              top: `${15 + i * 20}%`,
+              left: i % 2 === 0 ? `${5 + i * 3}%` : 'auto',
+              right: i % 2 !== 0 ? `${5 + i * 3}%` : 'auto',
+              pointerEvents: 'none',
+            }}
+          >
+            {emoji}
+          </Box>
+        ))}
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
           <Typography
             variant="h1"
             sx={{
-              fontSize: { xs: '2rem', md: '3rem' },
+              fontSize: { xs: '2.2rem', md: '3.2rem' },
               fontWeight: 700,
-              mb: 1,
-              textShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              mb: 1.5,
+              textShadow: '0 2px 16px rgba(0,0,0,0.15)',
+              animation: 'fadeInUp 0.7s ease both',
             }}
           >
             🥟 Dapoer Baba Abdullah
           </Typography>
           <Typography
             variant="h5"
-            sx={{ mb: 2, opacity: 0.9, fontWeight: 400, fontSize: { xs: '1rem', md: '1.3rem' } }}
+            sx={{
+              mb: 2,
+              opacity: 0.92,
+              fontWeight: 400,
+              fontSize: { xs: '1.05rem', md: '1.35rem' },
+              animation: 'fadeInUp 0.7s ease 0.15s both',
+            }}
           >
             Dim Sum Homemade Premium
           </Typography>
           <Typography
             variant="body1"
-            sx={{ mb: 4, opacity: 0.85, maxWidth: 500, mx: 'auto', lineHeight: 1.7 }}
+            sx={{
+              mb: 4.5,
+              opacity: 0.88,
+              maxWidth: 520,
+              mx: 'auto',
+              lineHeight: 1.8,
+              animation: 'fadeInUp 0.7s ease 0.3s both',
+            }}
           >
             Nikmati cita rasa dim sum autentik yang dibuat dengan bahan pilihan, tanpa MSG, segar
             setiap hari. Cocok untuk keluarga dan si kecil.
@@ -186,11 +220,16 @@ const HomePage: React.FC = () => {
               bgcolor: '#F6C453',
               color: '#5C2E00',
               fontWeight: 700,
-              fontSize: '1rem',
-              px: 4,
-              py: 1.5,
+              fontSize: '1.05rem',
+              px: 5,
+              py: 1.8,
+              borderRadius: 3,
+              animation: 'fadeInUp 0.7s ease 0.45s both',
+              boxShadow: '0 4px 20px rgba(246,196,83,0.4)',
               '&:hover': {
                 bgcolor: '#E5B342',
+                boxShadow: '0 6px 28px rgba(246,196,83,0.5)',
+                transform: 'translateY(-2px)',
               },
             }}
           >
@@ -200,22 +239,29 @@ const HomePage: React.FC = () => {
       </Box>
 
       {/* Benefits Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h4" fontWeight={700} textAlign="center" mb={1}>
+      <Container maxWidth="lg" sx={{ py: 10 }}>
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          textAlign="center"
+          mb={1}
+          sx={{ animation: 'fadeInUp 0.6s ease both' }}
+        >
           Kenapa Pilih Kami?
         </Typography>
         <Typography
           variant="body1"
           color="text.secondary"
           textAlign="center"
-          mb={5}
+          mb={6}
           maxWidth={500}
           mx="auto"
+          sx={{ animation: 'fadeInUp 0.6s ease 0.1s both' }}
         >
           Dapoer Baba Abdullah hadir dengan komitmen kualitas terbaik untuk keluarga Anda
         </Typography>
         <Grid container spacing={3} justifyContent="center">
-          {benefits.map((b) => (
+          {benefits.map((b, idx) => (
             <Grid size={{ xs: 6, sm: 4, md: 2 }} key={b.title}>
               <Card
                 sx={{
@@ -225,21 +271,25 @@ const HomePage: React.FC = () => {
                   border: '1px solid',
                   borderColor: 'divider',
                   boxShadow: 'none',
+                  cursor: 'default',
+                  animation: `fadeInUp 0.5s ease ${0.08 * idx}s both`,
                   '&:hover': {
-                    boxShadow: '0 4px 20px rgba(139,69,19,0.12)',
+                    boxShadow: '0 8px 28px rgba(160,82,45,0.12)',
                     borderColor: 'primary.main',
+                    transform: 'translateY(-6px)',
                   },
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.35s cubic-bezier(.4,0,.2,1)',
                 }}
               >
                 <CardContent>
                   <Avatar
                     sx={{
-                      bgcolor: 'primary.main',
+                      background: 'linear-gradient(135deg, #A0522D, #C4784A)',
                       mx: 'auto',
                       mb: 1.5,
-                      width: 52,
-                      height: 52,
+                      width: 56,
+                      height: 56,
+                      boxShadow: '0 4px 14px rgba(160,82,45,0.2)',
                     }}
                   >
                     {b.icon}
@@ -258,18 +308,25 @@ const HomePage: React.FC = () => {
       </Container>
 
       {/* Featured Menu */}
-      <Box sx={{ bgcolor: 'rgba(139,69,19,0.04)', py: 8 }}>
+      <Box sx={{ bgcolor: 'rgba(160,82,45,0.03)', py: 10 }}>
         <Container maxWidth="lg">
-          <Typography variant="h4" fontWeight={700} textAlign="center" mb={1}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            textAlign="center"
+            mb={1}
+            sx={{ animation: 'fadeInUp 0.6s ease both' }}
+          >
             Menu Andalan
           </Typography>
           <Typography
             variant="body1"
             color="text.secondary"
             textAlign="center"
-            mb={5}
+            mb={6}
             maxWidth={500}
             mx="auto"
+            sx={{ animation: 'fadeInUp 0.6s ease 0.1s both' }}
           >
             Pilihan dim sum terpopuler yang disukai pelanggan setia kami
           </Typography>
@@ -284,13 +341,13 @@ const HomePage: React.FC = () => {
               </Grid>
             ))}
           </Grid>
-          <Box sx={{ textAlign: 'center', mt: 5 }}>
+          <Box sx={{ textAlign: 'center', mt: 6 }}>
             <Button
               variant="outlined"
               size="large"
               onClick={() => navigate('/menu')}
               aria-label="Lihat semua menu"
-              sx={{ px: 4 }}
+              sx={{ px: 5, borderRadius: 3, borderWidth: 2, '&:hover': { borderWidth: 2 } }}
             >
               Lihat Semua Menu →
             </Button>
@@ -302,19 +359,19 @@ const HomePage: React.FC = () => {
       <Box
         component="footer"
         sx={{
-          bgcolor: '#8B4513',
+          background: 'linear-gradient(135deg, #6D3418 0%, #A0522D 100%)',
           color: 'white',
-          py: 4,
+          py: 5,
           textAlign: 'center',
         }}
       >
-        <Typography variant="h6" fontWeight={700}>
+        <Typography variant="h6" fontWeight={700} sx={{ animation: 'fadeIn 0.5s ease both' }}>
           🥟 Dapoer Baba Abdullah
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.8, mt: 1 }}>
+        <Typography variant="body2" sx={{ opacity: 0.85, mt: 1 }}>
           Dim Sum Homemade Premium · Segar Setiap Hari
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.8, mt: 0.5 }}>
+        <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5 }}>
           WhatsApp: +62 822-6007-0364
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.6, mt: 2, display: 'block' }}>

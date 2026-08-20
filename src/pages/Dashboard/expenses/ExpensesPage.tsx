@@ -31,7 +31,11 @@ const ExpensesPage: React.FC = () => {
   const [form, setForm] = useState({ purpose: '', quantity: 1, original_price: 0 });
   const [page, setPage] = useState(0);
   const rowsPerPage = 15;
-  const { from, to } = getDefaultRange(period);
+  const defaultRange = getDefaultRange(period);
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
+  const from = customFrom || defaultRange.from;
+  const to = customTo || defaultRange.to;
 
   const { data: expenses, isLoading } = useQuery({
     queryKey: ['expenses', from, to],
@@ -67,13 +71,36 @@ const ExpensesPage: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Period filter */}
+      {/* Period filter + Date range */}
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-        <ToggleButtonGroup value={period} exclusive onChange={(_e, v) => v && setPeriod(v)} size="small">
+        <ToggleButtonGroup value={period} exclusive onChange={(_e, v) => { if (v) { setPeriod(v); setCustomFrom(''); setCustomTo(''); setPage(0); } }} size="small">
           <ToggleButton value="daily">Harian</ToggleButton>
           <ToggleButton value="weekly">Mingguan</ToggleButton>
           <ToggleButton value="monthly">Bulanan</ToggleButton>
         </ToggleButtonGroup>
+        <TextField
+          label="Dari"
+          type="date"
+          size="small"
+          value={customFrom || from}
+          onChange={(e) => { setCustomFrom(e.target.value); setPage(0); }}
+          slotProps={{ inputLabel: { shrink: true } }}
+          sx={{ width: 160 }}
+        />
+        <TextField
+          label="Sampai"
+          type="date"
+          size="small"
+          value={customTo || to}
+          onChange={(e) => { setCustomTo(e.target.value); setPage(0); }}
+          slotProps={{ inputLabel: { shrink: true } }}
+          sx={{ width: 160 }}
+        />
+        {(customFrom || customTo) && (
+          <Button size="small" variant="outlined" onClick={() => { setCustomFrom(''); setCustomTo(''); setPage(0); }}>
+            Reset
+          </Button>
+        )}
         <Chip label={`Total: ${formatRp(totalExpense)}`} color="error" variant="outlined" sx={{ fontWeight: 700 }} />
       </Box>
 

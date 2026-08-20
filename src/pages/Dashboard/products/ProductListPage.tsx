@@ -87,7 +87,7 @@ const ProductListPage: React.FC = () => {
 
       {/* Table */}
       {error && <Alert severity="error" sx={{ mb: 2 }}>Gagal memuat produk. Pastikan backend berjalan.</Alert>}
-      <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+      <TableContainer component={Paper} sx={{ borderRadius: '12px' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: '#FFF3E0' }}>

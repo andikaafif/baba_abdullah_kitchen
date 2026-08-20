@@ -41,8 +41,8 @@ const NAV_ITEMS = [
   { label: 'Maintenance', path: '/dashboard/maintenance', icon: <MaintenanceIcon /> },
 ];
 
-const SIDEBAR_BG = '#2D1A0E';
-const SIDEBAR_ACTIVE = '#8B4513';
+const SIDEBAR_BG = '#1E120B';
+const SIDEBAR_ACTIVE = 'rgba(160,82,45,0.85)';
 
 const DashboardLayout: React.FC = () => {
   const { admin, logout } = useAuthStore();
@@ -66,18 +66,18 @@ const DashboardLayout: React.FC = () => {
     path === '/dashboard' ? location.pathname === '/dashboard' : location.pathname.startsWith(path);
 
   const drawerContent = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: SIDEBAR_BG }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: SIDEBAR_BG, background: `linear-gradient(180deg, ${SIDEBAR_BG} 0%, #15100A 100%)` }}>
       {/* Logo */}
       <Box sx={{ p: collapsed ? 1.5 : 3, display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-        <Avatar sx={{ bgcolor: '#8B4513', width: 40, height: 40 }}>
+        <Avatar sx={{ background: 'linear-gradient(135deg, #A0522D, #C4784A)', width: 42, height: 42, boxShadow: '0 2px 12px rgba(160,82,45,0.35)' }}>
           <RestaurantIcon fontSize="small" />
         </Avatar>
         {!collapsed && (
           <Box>
-            <Typography variant="subtitle1" fontWeight={700} color="white" lineHeight={1.2}>
+            <Typography variant="subtitle1" fontWeight={700} color="white" lineHeight={1.2} letterSpacing="-0.01em">
               Baba Abdullah
             </Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.65rem' }}>
               Kitchen Admin
             </Typography>
           </Box>
@@ -94,12 +94,16 @@ const DashboardLayout: React.FC = () => {
                 onClick={() => { navigate(item.path); setMobileOpen(false); }}
                 sx={{
                   mx: 1,
-                  borderRadius: 2,
+                  borderRadius: 2.5,
                   justifyContent: collapsed ? 'center' : 'flex-start',
                   px: collapsed ? 1.5 : 2,
-                  color: isActive(item.path) ? 'white' : 'rgba(255,255,255,0.65)',
+                  py: 1,
+                  color: isActive(item.path) ? 'white' : 'rgba(255,255,255,0.55)',
                   bgcolor: isActive(item.path) ? SIDEBAR_ACTIVE : 'transparent',
-                  '&:hover': { bgcolor: isActive(item.path) ? SIDEBAR_ACTIVE : 'rgba(255,255,255,0.08)' },
+                  backdropFilter: isActive(item.path) ? 'blur(8px)' : 'none',
+                  boxShadow: isActive(item.path) ? '0 2px 12px rgba(160,82,45,0.3)' : 'none',
+                  transition: 'all 0.25s cubic-bezier(.4,0,.2,1)',
+                  '&:hover': { bgcolor: isActive(item.path) ? SIDEBAR_ACTIVE : 'rgba(255,255,255,0.06)', color: 'white' },
                 }}
               >
                 <ListItemIcon sx={{ color: 'inherit', minWidth: collapsed ? 0 : 40 }}>{item.icon}</ListItemIcon>
@@ -142,7 +146,7 @@ const DashboardLayout: React.FC = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#FFF8F0' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#FFFAF5' }}>
       {/* Desktop permanent drawer */}
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
@@ -177,11 +181,11 @@ const DashboardLayout: React.FC = () => {
             zIndex: 1201,
             width: 28,
             height: 28,
-            bgcolor: '#8B4513',
+            bgcolor: '#A0522D',
             color: 'white',
-            boxShadow: 2,
+            boxShadow: '0 2px 10px rgba(160,82,45,0.3)',
             transition: 'left 0.2s ease',
-            '&:hover': { bgcolor: '#6D3510' },
+            '&:hover': { bgcolor: '#8B4513' },
           }}
         >
           {collapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
@@ -192,7 +196,7 @@ const DashboardLayout: React.FC = () => {
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Top AppBar (mobile only) */}
         {isMobile && (
-          <AppBar position="sticky" sx={{ bgcolor: '#8B4513' }}>
+          <AppBar position="sticky" sx={{ background: 'linear-gradient(135deg, #A0522D 0%, #C4784A 100%)', boxShadow: '0 2px 12px rgba(160,82,45,0.15)' }}>
             <Toolbar>
               <IconButton color="inherit" onClick={() => setMobileOpen(true)} edge="start" sx={{ mr: 2 }}>
                 <MenuIcon />

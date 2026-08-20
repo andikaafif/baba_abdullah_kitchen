@@ -41,27 +41,42 @@ const DashboardLoginPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #2D1A0E 0%, #8B4513 100%)',
+        background: 'linear-gradient(135deg, #1E120B 0%, #A0522D 50%, #C4784A 100%)',
         p: 2,
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: '20%',
+          right: '10%',
+          width: 300,
+          height: 300,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(246,196,83,0.15) 0%, transparent 70%)',
+          animation: 'float 8s ease-in-out infinite',
+        },
       }}
     >
-      <Card sx={{ width: '100%', maxWidth: 400, borderRadius: 4 }}>
+      <Card sx={{ width: '100%', maxWidth: 420, borderRadius: 5, boxShadow: '0 12px 48px rgba(0,0,0,0.25)', animation: 'scaleIn 0.5s ease both' }}>
         <CardContent sx={{ p: 4 }}>
           {/* Brand */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Box
               sx={{
-                width: 72, height: 72, borderRadius: 3, bgcolor: '#8B4513',
+                width: 76, height: 76, borderRadius: 4,
+                background: 'linear-gradient(135deg, #A0522D, #C4784A)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 mx: 'auto', mb: 2,
+                boxShadow: '0 4px 20px rgba(160,82,45,0.3)',
               }}
             >
-              <RestaurantIcon sx={{ color: 'white', fontSize: 36 }} />
+              <RestaurantIcon sx={{ color: 'white', fontSize: 38 }} />
             </Box>
-            <Typography variant="h5" fontWeight={700} color="primary">
+            <Typography variant="h5" fontWeight={700} color="primary" letterSpacing="-0.01em">
               Baba Abdullah Kitchen
             </Typography>
-            <Typography variant="body2" color="text.secondary" mt={0.5}>
+            <Typography variant="body2" color="text.secondary" mt={0.5} sx={{ letterSpacing: '0.03em' }}>
               Admin Dashboard
             </Typography>
           </Box>
