@@ -17,6 +17,9 @@ dist-ssr
 backend/.env
 backend/.env.production
 
+# GitHub prompts (local only)
+.github/prompts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
